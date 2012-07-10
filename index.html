@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+    <head>        
+        <meta charset="utf-8">
+        <style>
+            .link line {
+              stroke: #696969;
+            }
+            .link line.separator {
+              stroke: #fff;
+              stroke-width: 2px;
+            }
+            .node circle {
+              stroke: #000;
+              stroke-width: 1.5px;
+            }
+            .node text {
+              font: 10px sans-serif;
+              pointer-events: none;
+            }
+			
+			canvas {
+				margin: 0 auto;
+			}
+        </style>
+        <script src="http://d3js.org/d3.v2.js?2.9.6"></script>
+    </head>
+    <body>        
+        <script>
+            var width = window.innerWidth - 20,
+                height = window.innerHeight - 20;
+				
+            var color = d3.scale.category20();
+			
+			var zoomValue = 0;
+			var zoom = d3.behavior.zoom()				
+				.scaleExtent([-8, 8])
+				.on("zoom", function() {
+					zoomValue = d3.event.scale;
+				});
+			
+			var canvas = d3.select("body").append("canvas")
+				.attr("width", width)
+				.attr("height", height)
+				.call(zoom);
+
+			var context = canvas.node().getContext("2d");
+			context.fillStyle = "steelblue";
+			context.strokeStyle = "#666";
+			context.strokeWidth = 1.5;
+            
+            var radius = d3.scale.sqrt()
+                .range([0, 4]);
+			
+			var sw = d3.scale.sqrt()
+                .range([0.01, 0.2]);
+            
+            /*var svg = d3.select("body").append("svg")
+                .attr("width", width)
+                .attr("height", height);*/
+            
+            var force = d3.layout.force()
+                .size([width, height])
+                //.charge(-150)
+                .linkDistance(function(d) { return radius(d.source.size) + radius(d.target.size) + 20; });
+            
+            d3.json("graph.json", function(graph) {
+			
+				graph.nodes.forEach(function(d) {
+					color(d.type);
+					radius(d.size);
+					sw(d.size);					
+				});
+			
+				force
+					.nodes(graph.nodes)
+					.links(graph.edges)
+					.on("start", end)
+					.on("tick", end)
+					.on("end", end)
+					.start();
+			
+				/*var link = svg.selectAll(".link")
+					.data(graph.edges)
+					.enter().append("g")
+					.attr("class", "link");
+			
+				link.append("line")
+					.style("stroke-width", function(d) { return (d.bond * 2 - 1) * 2 + "px"; });
+			
+				link.filter(function(d) { return d.bond > 1; }).append("line")
+					.attr("class", "separator");
+			
+				var node = svg.selectAll(".node")
+					.data(graph.nodes)
+					.enter().append("g")
+					.attr("class", "node")
+					.style("visibility", function (d) {
+						return d.size > 5
+							?   null
+							:   "hidden";
+						})
+					.call(force.drag); //force.drag
+			
+				node.append("circle")
+					.attr("r", function(d) { return radius(d.size); })
+					.style("fill", function(d) { return color(d.type); });**/
+			
+				/*node.append("text")
+					.attr("dy", ".35em")
+					.attr("text-anchor", "middle")
+					.text(function(d) { return d.label; });*/
+				/*node.append("title")
+					.text(function(d) { return d.label; });*/
+					
+				function tick() {
+					link.selectAll("line")
+						.attr("x1", function(d) { return d.source.x; })
+						.attr("y1", function(d) { return d.source.y; })
+						.attr("x2", function(d) { return d.target.x; })
+						.attr("y2", function(d) { return d.target.y; });
+					
+					node.style("visibility", function (d) {
+						return d.x > 0 && d.x < width && d.y > 0 && d.y < height
+							?   null
+							:   "hidden";
+						})
+						.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+				}
+			
+				function end() {					
+					var echelleGenerale = Math.pow( Math.sqrt(2), zoomValue );
+						sizeFactor = echelleGenerale * Math.pow(echelleGenerale, -.15),
+						edgeSizeFactor = sizeFactor,
+						nodeSizeFactor = sizeFactor,
+						centerX = (window.innerWidth - 20) / 2,
+						centerY = (window.innerHeight - 20) / 2,
+						delx = centerX - (centerX * echelleGenerale),
+						dely = centerY - (centerY * echelleGenerale);
+				
+					context.clearRect(0, 0, width, height);
+
+					force.links().forEach(function(e) {
+						context.beginPath();
+						
+						context.strokeStyle = d3.rgb(color(e.target.type)).toString();
+						context.lineWidth = sw(e.target.size) * edgeSizeFactor;
+						
+						var xs = echelleGenerale * e.source.x + delx,
+							ys = echelleGenerale * e.source.y + dely,
+							xt = echelleGenerale * e.target.x + delx,
+							yt = echelleGenerale * e.target.y + dely;
+						
+						e.source.visibile = xs > 0 && xs < width && ys > 0 && ys < height;
+						e.target.visibile = xt > 0 && xt < width && yt > 0 && yt < height;
+						
+						if (e.source.visibile || e.target.visibile) {
+							context.moveTo(xs, ys);						
+							var x3 = .3 * yt - .3 * ys + .8 * xs + .2 * xt;
+							var y3 = .8 * ys + .2 * yt - .3 * xt + .3 * xs;
+							var x4 = .3 * yt - .3 * ys + .2 * xs + .8 * xt;
+							var y4 = .2 * ys + .8 * yt - .3 * xt + .3 * xs;
+							context.bezierCurveTo(x3,y3,x4,y4,xt,yt);
+							context.stroke();
+						}
+					});					
+					
+					force.nodes().forEach(function(d) {
+						var dx = echelleGenerale * d.x + delx, 
+							dy = echelleGenerale * d.y + dely;
+						if (d.visibile) {
+							context.beginPath();
+							context.fillStyle = d3.rgb(color(d.type)).toString();
+							context.strokeStyle = d3.rgb(color(d.type)).darker().toString();
+							context.lineWidth = sw(d.size) * edgeSizeFactor;
+							context.arc(dx, dy, radius(d.size) * nodeSizeFactor, 0, Math.PI*2, true);
+							context.fill();
+							context.stroke();
+						}						
+					});
+				}
+            });
+        </script>
+    </body>
+</html>
