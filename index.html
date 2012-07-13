@@ -3,8 +3,18 @@
 <head>
     <meta charset="utf-8">
     <style>
+        svg {
+            margin: 0 auto;
+            background: #444;
+            display: block;
+        }
+
         .link line {
             stroke: #696969;
+        }
+
+        .link path {
+            fill:none;
         }
 
         .link line.separator {
@@ -25,26 +35,85 @@
         canvas {
             margin: 0 auto;
             background: #444;
+            display: block;
         }
     </style>
-    <script src="http://d3js.org/d3.v2.js?2.9.6"></script>
+    <script src="http://d3js.org/d3.v2.min.js"></script>
 </head>
 <body>
+    <svg
+        xmlns:svg="http://www.w3.org/2000/svg"
+        xmlns="http://www.w3.org/2000/svg"
+        xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+        >
+        <defs id="starsFirst" xmlns="http://www.w3.org/2000/svg">
+            <filter id="filter5909" color-interpolation-filters="sRGB">
+                <feColorMatrix id="feColorMatrix5911" values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 1 0 " result="result7"/>
+                <feGaussianBlur id="feGaussianBlur5913" result="result6" stdDeviation="5"/>
+                <feComposite id="feComposite5915" in2="result7" operator="atop" in="result6" result="result91"/>
+                <feComposite id="feComposite5917" in2="result91" operator="in"/>
+            </filter>
+            <filter id="filter4888-1" color-interpolation-filters="sRGB">
+                <feGaussianBlur id="feGaussianBlur4890-2" stdDeviation="5" result="result1"/>
+                <feComposite k4="0" k3="0" k1="0" id="feComposite4892-6" in2="result1" operator="arithmetic" k2="2" in="result1"/>
+            </filter>
+            <clipPath id="clipPath116341" clipPathUnits="userSpaceOnUse">
+              <path inkscape:connector-curvature="0" id="path116343" d="m 254.487,230.377 8.162,0 0,-8.159 -8.162,0 0,8.159 z"/>
+            </clipPath>
+        </defs>
+        <defs id="starsZero" xmlns="http://www.w3.org/2000/svg">
+            <filter color-interpolation-filters="sRGB" id="filter6197" x="-0.28238368" width="1.5647674" y="-0.26952863" height="1.5390573">
+              <feGaussianBlur stdDeviation="4.7044925" id="feGaussianBlur6199"/>
+            </filter>
+            <filter id="filter6115" color-interpolation-filters="sRGB">
+              <feGaussianBlur id="feGaussianBlur6117" stdDeviation="5" result="result1"/>
+              <feComposite k4="0" k3="0" k1="0" id="feComposite6119" in2="result1" operator="arithmetic" k2="2" in="result1"/>
+            </filter>
+        </defs>
+        <defs id="starsSecond">
+            <linearGradient id="linearGradient3899">
+              <stop style="stop-color:#ffffff;stop-opacity:1;" offset="0" id="stop3901"/>
+              <stop style="stop-color:#ffffff;stop-opacity:0;" offset="1" id="stop3903"/>
+            </linearGradient>
+            <filter id="filter3831" inkscape:label="Noisy blur" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" inkscape:menu="Blurs" inkscape:menu-tooltip="Small-scale roughening and blurring to edges and content" x="-0.25" width="1.5" y="-0.25" height="1.5" color-interpolation-filters="sRGB">
+              <feGaussianBlur id="feGaussianBlur3833" stdDeviation="5" result="result1"/>
+              <feTurbulence id="feTurbulence3835" numOctaves="1" seed="0" type="fractalNoise" baseFrequency="0.1" result="result2"/>
+              <feDisplacementMap id="feDisplacementMap3837" in2="result2" scale="5" yChannelSelector="G" xChannelSelector="R" result="result3" in="result1"/>
+              <feComposite id="feComposite3839" in2="result3" operator="atop"/>
+            </filter>
+            <filter id="filter3859" inkscape:label="Noisy blur" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" inkscape:menu="Blurs" inkscape:menu-tooltip="Small-scale roughening and blurring to edges and content" color-interpolation-filters="sRGB" x="-0.25" width="1.5" y="-0.25" height="1.5">
+              <feTurbulence id="feTurbulence3861" type="fractalNoise" numOctaves="5" baseFrequency="0.02" result="result1"/>
+              <feComposite id="feComposite3863" in2="result1" operator="in" result="result2" in="SourceGraphic"/>
+              <feColorMatrix id="feColorMatrix3865" result="fbSourceGraphic" values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 3 -1 " in="result2"/>
+              <feColorMatrix result="fbSourceGraphicAlpha" in="fbSourceGraphic" values="0 0 0 -1 0 0 0 0 -1 0 0 0 0 -1 0 0 0 0 1 0" id="feColorMatrix3867"/>
+              <feGaussianBlur id="feGaussianBlur3869" stdDeviation="5" result="result1" in="fbSourceGraphic"/>
+              <feTurbulence id="feTurbulence3871" numOctaves="1" seed="0" type="fractalNoise" baseFrequency="0.1" result="result2"/>
+              <feDisplacementMap id="feDisplacementMap3873" in2="result2" scale="5" yChannelSelector="G" xChannelSelector="R" result="result3" in="result1"/>
+              <feComposite id="feComposite3875" in2="result3" operator="atop"/>
+            </filter>
+            <radialGradient xlink:href="#linearGradient3899" id="radialGradient3982" gradientUnits="userSpaceOnUse" spreadMethod="reflect" cx="83.842659" cy="75.54467" fx="83.842659" fy="75.54467" r="58.831825"/>
+        </defs>
+    </svg>
 <script>
     var width = window.innerWidth - 20,
             height = window.innerHeight - 20;
 
     var color = d3.scale.category20();
 
-    var zoomValue = -.5;
+    var zoomValue = -5;
     var zoom = d3.behavior.zoom();
     var lastZoom = 1;
 
+    var svg = d3.select("body").select("svg")
+            .attr("width", width)
+            .attr("height", height)
+            .call(zoom);
 
     var canvas = d3.select("body").append("canvas")
             .attr("width", width)
             .attr("height", height)
-            .call(zoom);
+            .style("display", "none");
+            //.call(zoom);
 
     var context = canvas.node().getContext("2d");
     context.fillStyle = "steelblue";
@@ -57,26 +126,365 @@
     var sw = d3.scale.sqrt()
             .range([0.01, 0.2]);
 
+    var calcAlpha = .5;
+
     var force = d3.layout.force()
             .size([width, height])
-            //.charge(-150)
+            .charge(-50)
+            //.gravity(10)
             .linkDistance(function (d) {
                 return radius(d.source.size) + radius(d.target.size) + 20;
             });
+    canvas.on("click", force.resume);
+    svg.on("click", force.resume);
+
+    var scale = Math.pow(Math.sqrt(2), zoomValue),
+        sizeFactor = scale * Math.pow(scale, -.15),
+        edgeSizeFactor = sizeFactor,
+        nodeSizeFactor = sizeFactor,
+        centerX = (window.innerWidth - 30) / 2,
+        centerY = (window.innerHeight - 20) / 2,
+        delx = centerX - (centerX * scale),
+        dely = centerY - (centerY * scale);
+
+    var stars = {};
+
+    function calcColor(d) {
+        return (d.type + d.size * d.tag.split(',').length) / 20;
+    }
+
+    function makeStars(parent, typeStars) {
+        if (!parent)
+            return;
+
+        switch (typeStars) {
+            case 0 :
+                if (stars.zeroGreatness)
+                    stars.zeroGreatness.remove();
+
+                stars.zeroGreatness = parent.append("g")
+                        .attr("class", "stars2");
+                stars.zeroGreatness.append("g")
+                        .attr("transform", "translate(-140, -58)")
+                        .append("g")
+                        .attr("class", "outter")
+                        //.attr("transform", "translate(-157.5838,-167.68533)")
+                        .append("path")
+                        .attr("transform", "matrix(1.5656854,0,0,0.75958369,9.13997,-4.06119)")
+                        .attr("sodipodi:sodipodi:ry", "50.507626")
+                        .attr("sodipodi:sodipodi:rx", "50.507626")
+                        .attr("sodipodi:sodipodi:cy", "75.54467")
+                        .attr("sodipodi:sodipodi:cx", "83.842659")
+                        .attr("sodipodi:sodipodi:type", "arc")
+                        .attr("d", "m 134.35028,75.54467 c 0,27.89459 -22.61303,50.50763 -50.507621,50.50763 -27.894591,0 -50.507626,-22.61304 -50.507626,-50.50763 0,-27.894591 22.613035,-50.507625 50.507626,-50.507625 27.894591,0 50.507621,22.613034 50.507621,50.507625 z")
+                        .style("opacity", 0.6)
+                        .style("fill", function(d) { return color(calcColor(d)) })
+                        .style("filter", "url(#filter3859)");
+                stars.zeroGreatness.selectAll(".outter").append("path")
+                        .attr("transform", "matrix(-0.81901553,0.04016906,-0.02181049,-0.44469885,227.01302,84.54806)")
+                        .attr("sodipodi:sodipodi:ry", "50.507626")
+                        .attr("sodipodi:sodipodi:rx", "50.507626")
+                        .attr("sodipodi:sodipodi:cy", "75.54467")
+                        .attr("sodipodi:sodipodi:cx", "83.842659")
+                        .attr("sodipodi:sodipodi:type", "arc")
+                        .attr("d", "m 134.35028,75.54467 c 0,27.89459 -22.61303,50.50763 -50.507621,50.50763 -27.894591,0 -50.507626,-22.61304 -50.507626,-50.50763 0,-27.894591 22.613035,-50.507625 50.507626,-50.507625 27.894591,0 50.507621,22.613034 50.507621,50.507625 z")
+                        .style("opacity", 0.7)
+                        .style("fill", function(d) { return d3.rgb(color(calcColor(d))).brighter().toString() })
+                        .style("filter", "url(#filter3859)");
+                stars.zeroGreatness.selectAll(".outter").append("path")
+                        .attr("sodipodi:sodipodi:type", "star")
+                        .attr("style", "fill:#ffffff;fill-opacity:1")
+                        .attr("sodipodi:sodipodi:sides", "9")
+                        .attr("sodipodi:sodipodi:cx", "408.802")
+                        .attr("sodipodi:sodipodi:cy", "662.41638")
+                        .attr("sodipodi:sodipodi:r1", "34.595016")
+                        .attr("sodipodi:sodipodi:r2", "0.80043751")
+                        .attr("sodipodi:sodipodi:arg1", "1.2736714")
+                        .attr("sodipodi:sodipodi:arg2", "1.6227373")
+                        .attr("d", "m 418.93047,695.49552 -10.17002,-32.27978 -13.46246,31.05118 12.95836,-31.26491 -30.27215,15.13309 30.02337,-15.62084 -32.91717,-7.86594 33.04012,7.33239 -20.15989,-27.18441 20.59703,26.85472 2.03043,-33.783 -1.48364,33.81142 23.27069,-24.57413 -22.8701,24.94738 33.62234,-3.86677 -33.55538,4.41019 28.24172,18.64991 -28.53973,-18.19058 z")
+                        .attr("transform", "matrix(0.60865681,-0.02610034,0.02610034,0.60865681,-125.24117,-338.82995)");
+                stars.zeroGreatness.selectAll(".outter").append("path")
+                        .attr("sodipodi:sodipodi:type", "arc")
+                        .attr("style", "fill:#ffffff;fill-opacity:1;filter:url(#filter3831)")
+                        .style("fill", function(d) { return color(calcColor(d)) })
+                        .attr("sodipodi:sodipodi:cx", "83.842659")
+                        .attr("sodipodi:sodipodi:cy", "75.54467")
+                        .attr("sodipodi:sodipodi:rx", "50.507626")
+                        .attr("sodipodi:sodipodi:ry", "50.507626")
+                        .attr("d", "m 134.35028,75.54467 c 0,27.89459 -22.61303,50.50763 -50.507621,50.50763 -27.894591,0 -50.507626,-22.61304 -50.507626,-50.50763 0,-27.894591 22.613035,-50.507625 50.507626,-50.507625 27.894591,0 50.507621,22.613034 50.507621,50.507625 z")
+                        .attr("transform", "matrix(0.1885681,0,0,0.1885681,124.60115,39.075996)");
+                stars.zeroGreatness.selectAll(".outter").append("path")
+                        .attr("transform", "matrix(0.39032722,0,0,0.39032722,107.68513,23.83417)")
+                        .attr("sodipodi:sodipodi:ry", "50.507626")
+                        .attr("sodipodi:sodipodi:rx", "50.507626")
+                        .attr("sodipodi:sodipodi:cy", "75.54467")
+                        .attr("sodipodi:sodipodi:cx", "83.842659")
+                        .attr("sodipodi:sodipodi:type", "arc")
+                        .attr("d", "m 134.35028,75.54467 c 0,27.89459 -22.61303,50.50763 -50.507621,50.50763 -27.894591,0 -50.507626,-22.61304 -50.507626,-50.50763 0,-27.894591 22.613035,-50.507625 50.507626,-50.507625 27.894591,0 50.507621,22.613034 50.507621,50.507625 z")
+                        .style("fill-opacity", 0.7)
+                        .style("fill", "url(#radialGradient3982)")
+                        .style("filter", "url(#filter3831)");
+                stars.zeroGreatness.selectAll(".outter").append("path")
+                        .attr("transform", "matrix(0.39032722,0,0,0.39032722,107.68513,23.83417)")
+                        .attr("sodipodi:sodipodi:ry", "50.507626")
+                        .attr("sodipodi:sodipodi:rx", "50.507626")
+                        .attr("sodipodi:sodipodi:cy", "75.54467")
+                        .attr("sodipodi:sodipodi:cx", "83.842659")
+                        .attr("sodipodi:sodipodi:type", "arc")
+                        .attr("d", "m 134.35028,75.54467 c 0,27.89459 -22.61303,50.50763 -50.507621,50.50763 -27.894591,0 -50.507626,-22.61304 -50.507626,-50.50763 0,-27.894591 22.613035,-50.507625 50.507626,-50.507625 27.894591,0 50.507621,22.613034 50.507621,50.507625 z")
+                        .style("fill-opacity", 0.7)
+                        .style("fill", "url(#radialGradient3982)")
+                        .style("filter", "url(#filter3831)");
+                break;
+            case 1 :
+                if (stars.firstGreatness)
+                    stars.firstGreatness.remove();
+
+                stars.firstGreatness = parent.append("g")
+                        .attr("class", "stars1");
+                stars.firstGreatness.append("g")
+                        .attr("transform", "translate(-52, -52)")
+                        .append("g")
+                        .attr("class", "outter")
+                        .attr("transform", "translate(-332.30773,-562.38891)")
+                        .append("path")
+                        .attr("d", "m 412.46549,642.0517 -27.56005,-26.9168 -0.45485,38.52095 -0.45484,-38.52095 -27.56006,26.9168 26.91681,-27.56005 -38.52095,-0.45485 38.52095,-0.45484 -26.9168,-27.56005 27.56005,26.9168 0.45485,-38.52095 0.45484,38.52095 27.56005,-26.9168 -26.9168,27.56005 38.52095,0.45485 -38.52095,0.45484 z")
+                        .attr("sodipodi:sodipodi:arg2", "1.1780974")
+                        .attr("sodipodi:sodipodi:arg1", "0.78539824")
+                        .attr("sodipodi:sodipodi:r2", "1.1885713")
+                        .attr("sodipodi:sodipodi:r1", "39.619045")
+                        .attr("sodipodi:sodipodi:cy", "614.0368")
+                        .attr("sodipodi:sodipodi:cx", "384.45059")
+                        .attr("sodipodi:sodipodi:sides", "8")
+                        .attr("sodipodi:sodipodi:type", "star")
+                        .attr("style", function(d) {return "fill:" + color(calcColor(d)) + ";filter:url(#filter5909)"});
+                stars.firstGreatness.selectAll(".outter").append("path")
+                        .attr("d", "m 415.91347,628.69075 -28.03151,-12.30866 8.45434,30.26423 -11.11773,-28.5248 -15.42192,27.37816 12.30865,-28.0315 -30.26423,8.45433 28.52481,-11.11773 -27.37817,-15.42192 28.03151,12.30866 -8.45434,-30.26424 11.11773,28.52481 15.42193,-27.37816 -12.30866,28.0315 30.26423,-8.45434 -28.5248,11.11774 z")
+                        .attr("sodipodi:sodipodi:arg2", "0.59955522")
+                        .attr("sodipodi:sodipodi:arg1", "0.43587706")
+                        .attr("sodipodi:sodipodi:r2", "4.1562829")
+                        .attr("sodipodi:sodipodi:r1", "34.70808")
+                        .attr("sodipodi:sodipodi:cy", "614.0368")
+                        .attr("sodipodi:sodipodi:cx", "384.45059")
+                        .attr("sodipodi:sodipodi:sides", "8") //#deffff
+                        .attr("style", function(d) {return "fill:" + d3.rgb(color(calcColor(d))).brighter().toString() + ";fill-opacity:1;filter:url(#filter4888-1)"})
+                        .attr("sodipodi:sodipodi:type", "star")
+                        .attr("transform", "translate(-7.0792635e-6,0.86198797)");
+                break;
+            case 2 :
+                if (stars.secondGreatness)
+                    stars.secondGreatness.remove();
+
+                var defs = d3.selectAll("starsZeroGr");
+                if (defs)
+                    defs.remove();
+                defs = svg.append("defs").attr("id", "starsZeroGr");
+
+                var makeGrad = function(d, type) {
+                    if (!type)
+                        type = 0;
+
+                    defs.append("radialGradient")
+                            .attr("xlink:xlink:href", "#lg_st_" + type + "_" + d.index)
+                            .attr("id", "rg_st_" + type + "_" + d.index)
+                            .attr("cx", "398.24252")
+                            .attr("cy", "662.73962")
+                            .attr("fx", "398.24252")
+                            .attr("fy", "662.73962")
+                            .attr("r", type ? "47.601433" : "31.487122")
+                            .attr("gradientTransform", type ? "matrix(1,0,0,1.0336521,0,-22.302595)" : "matrix(1,0,0,1.0302824,0,-20.069346)")
+                            .attr("gradientUnits", "userSpaceOnUse");
+
+                    var lin = defs.append("linearGradient")
+                            .attr("id", "lg_st_" + type + "_" + d.index);
+                    lin.append("stop")
+                            .attr("offset","0")
+                            .attr("style", "stop-color:#deffff;stop-opacity:1;")
+                            .style("stop-color", color(calcColor(d)));
+                    lin.append("stop")
+                            .attr("offset","1")
+                            .attr("style", "stop-color:#deffff;stop-opacity:0;")
+                            .style("stop-color", color(calcColor(d)));
+
+                    return "url(#rg_st_" + type + "_" + d.index + ")";
+                }
+
+                stars.secondGreatness = parent.append("g")
+                        .attr("class", "stars0");
+                stars.secondGreatness.append("g")
+                        .attr("transform", "translate(-102, -60)")
+                        .append("g")
+                        .attr("class", "outter")
+                        .attr("transform", "translate(-309.89778,-605.66567)")
+                        .append("path")
+                        .attr("transform", "matrix(3.1757535,0,0,1,-854.82231,-0.388021)")
+                        .attr("d", "m 410.74148,679.54857 -10.62929,-11.26426 -1.63785,15.40074 -1.97831,-15.36072 -10.37737,11.49676 7.42831,-13.5899 -15.15309,3.2014 13.99757,-6.62821 -14.14084,-6.31677 15.22023,2.86523 -7.72727,-13.42216 10.62928,11.26426 1.63785,-15.40074 1.97831,15.36071 10.37738,-11.49675 -7.42832,13.5899 15.1531,-3.2014 -13.99758,6.6282 14.14085,6.31678 -15.22024,-2.86523 z")
+                        .attr("sodipodi:sodipodi:arg2", "1.2455696")
+                        .attr("sodipodi:sodipodi:arg1", "0.93141043")
+                        .attr("sodipodi:sodipodi:r2", "5.8514285")
+                        .attr("sodipodi:sodipodi:r1", "20.946705")
+                        .attr("sodipodi:sodipodi:cy", "662.73962")
+                        .attr("sodipodi:sodipodi:cx", "398.24252")
+                        .attr("sodipodi:sodipodi:sides", "10")
+                        .attr("style", "opacity:0.7;" +
+                                       "fill:url(#radialGradient6179);" +
+                                       "fill-opacity:1;" +
+                                       "filter:url(#filter6197)")
+                        .style("fill", function(d) { return makeGrad(d, 0) })
+                        .attr("sodipodi:sodipodi:type", "star");
+                stars.secondGreatness.selectAll(".outter").append("path")
+                        .attr("sodipodi:sodipodi:type", "star")
+                        .style("fill", function(d) { return color(curType = (calcColor(d))) })
+                        .style("fill-opacity", "1")
+                        .attr("sodipodi:sodipodi:sides", "9")
+                        .attr("sodipodi:sodipodi:cx", "408.802")
+                        .attr("sodipodi:sodipodi:cy", "662.41638")
+                        .attr("sodipodi:sodipodi:r1", "34.595016")
+                        .attr("sodipodi:sodipodi:r2", "0.80043751")
+                        .attr("sodipodi:sodipodi:arg1", "1.2736714")
+                        .attr("sodipodi:sodipodi:arg2", "1.6227373")
+                        .attr("d", "m 418.93047,695.49552 -10.17002,-32.27978 -13.46246,31.05118 12.95836,-31.26491 -30.27215,15.13309 30.02337,-15.62084 -32.91717,-7.86594 33.04012,7.33239 -20.15989,-27.18441 20.59703,26.85472 2.03043,-33.783 -1.48364,33.81142 23.27069,-24.57413 -22.8701,24.94738 33.62234,-3.86677 -33.55538,4.41019 28.24172,18.64991 -28.53973,-18.19058 z");
+                stars.secondGreatness.selectAll(".outter").append("path")
+                        .attr("sodipodi:type", "star")
+                        .attr("style", "fill:url(#radialGradient6187);" +
+                                       "fill-opacity:1;" +
+                                       "filter:url(#filter6115)")
+                        .style("fill", function(d) { return makeGrad(d, 1) })
+                        .attr("sodipodi:sodipodi:sides", "9")
+                        .attr("sodipodi:sodipodi:cx", "398.24252")
+                        .attr("sodipodi:sodipodi:cy", "662.73962")
+                        .attr("sodipodi:sodipodi:r1", "49.886093")
+                        .attr("sodipodi:sodipodi:r2", "5.8514285")
+                        .attr("sodipodi:sodipodi:arg1", "0.87716425")
+                        .attr("sodipodi:sodipodi:arg2", "1.2262301")
+                        .attr("d", "m 430.13641,701.09849 -29.91734,-32.85137 -2.20101,44.37809 -1.80156,-44.3961 -30.21177,32.58081 27.15719,-35.16741 -44.08609,5.5386 43.40879,-9.48349 -37.33205,-24.09518 39.34893,20.63785 -13.10992,-42.45456 16.87727,41.10252 17.24648,-40.94897 -13.49145,42.33486 39.53306,-20.28292 -37.54737,23.75825 43.32169,9.87375 -44.03447,-5.93511 z")
+                        .attr("transform", "translate(10.469284,-0.46332952)");
+               break;
+            case 3 :
+                if (stars.thirdGreatness)
+                    stars.thirdGreatness.remove();
+
+                stars.thirdGreatness = parent.append("g")
+                        .attr("class", "stars3");
+                stars.thirdGreatness.append("g")
+                        .attr("class", "inner")
+                        .attr("transform", "translate(-21, -21)")
+                        .append("g")
+                        .attr("class", "outter")
+                        .attr("transform", "translate(-1070.6413,-990.16135)")
+                        .append("path")
+                        .attr("d", "m 1113.955,1017.268 c -0.277,10.904 -9.307,19.514 -20.211,19.292 -10.887,-0.256 -19.529,-9.322 -19.273,-20.229 0.26,-10.887 9.305,-19.531 20.213,-19.271 10.904,0.254 19.513,9.303 19.271,20.208 z")
+                        .style("opacity", 0.2)
+                        .style("fill", function(d) {
+                            return d3.rgb(color(calcColor(d)))
+                                    .brighter()
+                                    .toString()
+                        });
+                stars.thirdGreatness.selectAll(".outter").append("path")
+                        .attr("d", "m 1111.912,1017.213 c -0.219,9.782 -8.363,17.509 -18.111,17.287 -9.783,-0.222 -17.527,-8.35 -17.287,-18.132 0.221,-9.766 8.328,-17.51 18.113,-17.271 9.766,0.222 17.527,8.35 17.285,18.116 z")
+                        .style("opacity", 0.2)
+                        .style("fill", function(d) {
+                            return d3.rgb(color(calcColor(d)))
+                                    .brighter()
+                                    .toString()
+                        });
+                stars.thirdGreatness.selectAll(".outter").append("path")
+                        .attr("d", "m 1107.834,1017.14 c -0.188,7.501 -6.422,13.462 -13.943,13.279 -7.52,-0.184 -13.459,-6.422 -13.293,-13.94 0.166,-7.539 6.418,-13.479 13.938,-13.296 7.521,0.166 13.46,6.418 13.298,13.957 z")
+                        .style("opacity", 0.2)
+                        .style("fill", function(d) {
+                            return d3.rgb(color(calcColor(d)))
+                                    .brighter()
+                                    .toString()
+                        });
+                stars.thirdGreatness.selectAll(".outter").append("path")
+                        .style("opacity", 0.4)
+                        .attr("d", "m 1102.371,1016.991 c -0.094,4.524 -3.828,8.093 -8.35,7.982 -4.541,-0.111 -8.094,-3.863 -7.982,-8.35 0.09,-4.524 3.844,-8.09 8.367,-7.979 4.524,0.09 8.076,3.826 7.965,8.347 z")
+                        .style("fill", function(d) { return color(calcColor(d)) });
+
+                stars.thirdGreatness.selectAll(".inner")
+                        .append("g")
+                        .attr("class", "outter1")
+                        .attr("transform", "matrix(0.95767353,0,0,0.95767353,-393.20808,-433.63763)")
+                        .append("g")
+                        .attr("transform", "matrix(1.25,0,0,-1.25,452.07562,480.62886)")
+                        .append("path")
+                        .attr("d", "M 0,0 C -14.945,0.799 -14.298,1.447 -13.5,-13.5 -12.701,1.447 -12.053,0.799 -27.001,0 -12.053,-0.799 -12.701,-1.446 -13.5,13.5 -14.298,-1.446 -14.945,-0.799 0,0")
+                        .attr("style", "fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none")
+                        .style("fill", function(d) {
+                            return d3.rgb(color(calcColor(d)))
+                                    .brighter()
+                                    .brighter()
+                                    .brighter()
+                                    .toString()
+                        });
+                stars.thirdGreatness.selectAll(".outter1")
+                        .append("g")
+                        .attr("transform", "matrix(1.25,0,0,-1.25,111.99012,763.50118)")
+                        .append("g")
+                        .attr("clip-path", "url(#clipPath116341)")
+                        .style("opacity", "0.5")
+                        .append("g")
+                        .attr("transform", "translate(262.6494,226.2979)")
+                        .append("path")
+                        .attr("d", "m 0,0 c 0,-2.252 -1.829,-4.08 -4.079,-4.08 -2.255,0 -4.083,1.828 -4.083,4.08 0,2.253 1.828,4.079 4.083,4.079 C -1.829,4.079 0,2.253 0,0")
+                        .attr("style", "fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none")
+                        .style("fill", function(d) {
+                            return d3.rgb(color(calcColor(d)))
+                                    .brighter()
+                                    .brighter()
+                                    .brighter()
+                                    .toString()
+                        });
+                break;
+            default:
+                    parent.append("circle")
+                        .attr("r", function(d) { return radius(d.size) * nodeSizeFactor; })
+                        .style("fill", function(d) { return color(d.type); })
+                        .style("stroke", function(d) { return d3.rgb(color(d.type)).darker().toString() })
+                        .style("stroke-width", function(d) { return sw(d.size) * edgeSizeFactor});
+                break;
+        }
+    }
+
+    function resize() {
+        scale = Math.pow(Math.sqrt(2), zoomValue),
+        sizeFactor = scale * Math.pow(scale, -.15),
+        edgeSizeFactor = sizeFactor,
+        nodeSizeFactor = sizeFactor,
+        centerX = (window.innerWidth - 30) / 2,
+        centerY = (window.innerHeight - 20) / 2,
+        delx = centerX - (centerX * scale),
+        dely = centerY - (centerY * scale);
+    }
+
 
     d3.json("graph.json", function (graph) {
 
-        graph.nodes.forEach(function (d) {
-            color(d.type);
-            radius(d.size);
-            sw(d.size);
-        });
+        /*var link = svg.selectAll(".link")
+            .data(graph.edges)
+            .enter().append("g")
+            .attr("class", "link");
+
+        var node = svg.selectAll(".node")
+            .data(graph.nodes)
+            .enter().append("g")
+            .attr("class", "node")
+            .call(force.drag);*/
 
         force
             .nodes(graph.nodes)
             .links(graph.edges)
+            .on("start", tick_start)
+            .on("end", tick_end)
             .on("tick", tick)
-            .start();
+            .start()
+            .alpha(calcAlpha);
+
+        graph.nodes.forEach(function(d) {
+            color(calcColor(d));
+            radius(d.size);
+            sw(d.size);
+        })
 
         zoom.on("zoom", function () {
             if (lastZoom < d3.event.scale)
@@ -84,19 +492,126 @@
             else if (lastZoom > d3.event.scale)
                 zoomValue--;
             lastZoom = d3.event.scale;
-            tick();
+            tick_end();
         });
 
-        function tick() {
-            var scale = Math.pow(Math.sqrt(2), zoomValue),
-                sizeFactor = scale * Math.pow(scale, -.15),
-                edgeSizeFactor = sizeFactor,
-                nodeSizeFactor = sizeFactor,
-                centerX = (window.innerWidth - 20) / 2,
-                centerY = (window.innerHeight - 20) / 2,
-                delx = centerX - (centerX * scale),
-                dely = centerY - (centerY * scale);
+        svg.append("g")
+            .attr("id", "stateCont")
+            .attr("transform", "translate(" + centerX + "," + centerY + ")")
+            .append("text")
+            .attr("id", "stateLabel")
+            .style("fill", "#fff")
+            .attr("dy", ".35em")
+            .attr("text-anchor", "middle")
+            .text("100% left...");
 
+        function elx(x, y) {
+            return x;//Math.sqrt(Math.pow(y * 0.1, 3) + 150 * 0.1 * y + 50);
+        }
+
+        function ely(y, x, a, b) {
+            return y//Math.sqrt(Math.pow(x * 0.1, 3) + a * 0.1 * x + b);
+        }
+
+        function tick() {
+            d3.select("#stateCont")
+                .style("visibility", null);
+            d3.select("#stateLabel")
+                .text(Math.round(force.alpha() * 100000 / calcAlpha) / 1000 + "% left...");
+        }
+
+        function tick_start() {
+            svg.selectAll(".node").style("visibility", "hidden");
+        }
+
+        function tick_end() {
+            resize();
+
+            mywin = window.open('text/plain','', 'menubar=1,scrollbars=2,resizeable=1');
+            mywin.document.open;
+            mywin.opener = self;
+            mywin.document.write(JSON.stringify({
+                nodes : force.nodes(),
+                edges : force.links()
+            }));
+
+            svg.select("#stateCont")
+                .style("visibility", "hidden");
+
+            var link = svg.selectAll(".link")
+                .data(graph.edges)
+                .enter().append("g")
+                .attr("class", "link")
+                .append("path");
+
+            stars.zeroGreatness = false;
+            stars.firstGreatness = false;
+            stars.secondGreatness = false;
+            stars.thirdGreatness = false;
+
+            force.nodes()
+                .forEach(function(d) {
+                    d.rx = elx(scale * d.x + delx, scale * d.y + dely),
+                    d.ry = ely(scale * d.y + dely, scale * d.x + delx, d.size, d.type);
+                    d.visibile = d.rx > 0 && d.rx < width && d.ry > 0 && d.ry < height;
+                });
+
+            var node = svg.selectAll(".node")
+                        .data(force.nodes()
+                                .filter(function(d) {return d.visibile && d.type < 2 || zoomValue > 0}))
+                        .enter().append("g")
+                        .attr("class", "node")
+                        .call(force.drag);
+
+            node
+                .attr("transform", function(d) {
+                        return "translate(" + d.rx + "," + d.ry + ")";
+                });
+
+
+            link.selectAll("path")
+                .style("stroke", function(d) { return d3.rgb(color(d.target.type)).toString() })
+                .style("stroke-width", function(d) { return sw(d.target.size) * nodeSizeFactor })
+                .attr("d", function(d) {
+                    var xs = d.source.rx,
+                        ys = d.source.ry,
+                        xt = d.target.rx,
+                        yt = d.target.ry;
+
+                    var x3 = .3 * yt - .3 * ys + .8 * xs + .2 * xt;
+                    var y3 = .8 * ys + .2 * yt - .3 * xt + .3 * xs;
+                    var x4 = .3 * yt - .3 * ys + .2 * xs + .8 * xt;
+                    var y4 = .2 * ys + .8 * yt - .3 * xt + .3 * xs;
+
+                    return "M " + xs + "," + ys + " C " + x3 + "," + y3 + " " + x4 + "," + y4 + " " + xt + "," + yt;
+                });
+
+            if (!stars.zeroGreatness)
+                makeStars(node.filter(function(d) { return d.type == 0 }), 0);
+            if (!stars.firstGreatness)
+                makeStars(node.filter(function(d) { return d.type == 1 }), 1);
+            if (!stars.secondGreatness)
+                makeStars(node.filter(function(d) { return d.type == 2 }), 2);
+            if (!stars.thirdGreatness)
+                makeStars(node.filter(function(d) { return d.type == 3 }), 3);
+
+            if (stars.zeroGreatness)
+                stars.zeroGreatness
+                        .attr("transform", function(d) { return "scale(" + 0.05 * nodeSizeFactor * radius(d.size)  + ")"});
+            if (stars.firstGreatness)
+                stars.firstGreatness
+                        .attr("transform", function(d) { return "scale(" + 0.05 * nodeSizeFactor * radius(d.size)  + ")"});
+            if (stars.secondGreatness)
+                stars.secondGreatness
+                        .attr("transform", function(d) { return "scale(" + 0.05 * nodeSizeFactor * radius(d.size)  + ")"});
+            if (stars.thirdGreatness)
+                stars.thirdGreatness
+                        .attr("transform", function(d) {
+                            return "scale(" + 0.05 * nodeSizeFactor * radius(d.size * d.tag.split(",").length) + ")"});
+        }
+
+        function tick_canvas() {
+            resize();
             context.clearRect(0, 0, width, height);
 
             force.links().forEach(function (e) {
@@ -105,10 +620,10 @@
                 context.strokeStyle = d3.rgb(color(e.target.type)).toString();
                 context.lineWidth = sw(e.target.size) * edgeSizeFactor;
 
-                var xs = scale * e.source.x + delx,
-                    ys = scale * e.source.y + dely,
-                    xt = scale * e.target.x + delx,
-                    yt = scale * e.target.y + dely;
+                var xs = elx(scale * e.source.x + delx),
+                    ys = ely(scale * e.source.y + dely),
+                    xt = elx(scale * e.target.x + delx),
+                    yt = ely(scale * e.target.y + dely);
 
                 e.source.visibile = xs > 0 && xs < width && ys > 0 && ys < height;
                 e.target.visibile = xt > 0 && xt < width && yt > 0 && yt < height;
@@ -119,14 +634,14 @@
                     var y3 = .8 * ys + .2 * yt - .3 * xt + .3 * xs;
                     var x4 = .3 * yt - .3 * ys + .2 * xs + .8 * xt;
                     var y4 = .2 * ys + .8 * yt - .3 * xt + .3 * xs;
-                    context.bezierCurveTo(x3, y3, x4, y4, xt, yt);
+                    //context.bezierCurveTo(x3, y3, x4, y4, xt, yt);
                     context.stroke();
                 }
             });
 
             force.nodes().forEach(function (d) {
-                var dx = scale * d.x + delx,
-                        dy = scale * d.y + dely;
+                var dx = elx(scale * d.x + delx, scale * d.y + delx),
+                    dy = ely(scale * d.y + dely, scale * d.x + dely);
                 if (d.visibile) {
                     context.beginPath();
                     context.fillStyle = d3.rgb(color(d.type)).toString();
