@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        .link line {
+            stroke: #696969;
+        }
+
+        .link line.separator {
+            stroke: #fff;
+            stroke-width: 2px;
+        }
+
+        .node circle {
+            stroke: #000;
+            stroke-width: 1.5px;
+        }
+
+        .node text {
+            font: 10px sans-serif;
+            pointer-events: none;
+        }
+
+        #cont {
+            margin: 0 auto;
+            background: #444;
+            overflow: hidden;
+        }
+
+        canvas {
+            margin: 0 auto;
+            background: #444;
+        }
+        img {
+            position: fixed;
+            top: -200px;
+        }
+    </style>
+    <script src="http://mbostock.github.com/d3/d3.v2.js?2.9.6"></script>
+</head>
+<body>
+<img src="s2.png" id="s2" />
+<img src="s3.png" id="s3" />
+<img src="s4.png" id="s4" />
+<img src="s5.png" id="s5" />
+<script>
+    var margin = {top:0, right:18, bottom:22, left:0},
+        width = function() { return window.innerWidth - margin.left - margin.right },
+        height = function() { return window.innerHeight - margin.top - margin.bottom };
+
+    var color = d3.scale.category20();
+
+    function calcColor(d) {
+        return (d.type + d.size * d.tag.split(',').length) / 20;
+    }
+
+    var zoomValue = -7;
+    var zoom = d3.behavior.zoom()
+            .scale(8)
+            .translate([0, 0])
+            .scaleExtent([0.1, 8]);
+    var lastZoom = 1;
+
+    var canvas = d3.select("body").append("div")
+            .attr("id", "cont")
+            .call(zoom)
+            .append("canvas")
+            .attr("width", width())
+            .attr("height", height());
+
+    var context = canvas.node().getContext("2d");
+    context.fillStyle = "steelblue";
+    context.strokeStyle = "#666";
+    context.strokeWidth = 1.5;
+
+    var radius = d3.scale.sqrt()
+            .range([0, 4]);
+
+    var sw = d3.scale.sqrt()
+            .range([0.01, 0.2]);
+
+    d3.json("graph.json", function (graph) {
+
+        graph.nodes.forEach(function (d) {
+            color(calcColor(d));
+            radius(d.size);
+            sw(d.size);
+        });
+
+        zoom.on("zoom", function () {
+            /*if (lastZoom < d3.event.scale)
+                zoomValue++;
+            else if (lastZoom > d3.event.scale)
+                zoomValue--;
+            lastZoom = d3.event.scale;*/
+            zoomValue = 1 - d3.event.scale;
+            tick();
+        });
+
+        function tick() {
+            canvas
+                .attr("width", width())
+                .attr("height", height());
+
+            var scale = Math.pow(Math.sqrt(2), zoomValue),
+                sizeFactor = scale * Math.pow(scale, -.15),
+                edgeSizeFactor = sizeFactor,
+                nodeSizeFactor = sizeFactor,
+                centerX = width() / 2,
+                centerY = height() / 2,
+                delx = centerX - (centerX * scale),
+                dely = centerY - (centerY * scale);
+
+            var i2 = d3.select("#s2"),
+                i3 = d3.select("#s3"),
+                i4 = d3.select("#s4"),
+                i5 = d3.select("#s5");
+
+            context.clearRect(0, 0, width(), height());
+
+            /*graph.links().forEach(function (e) {
+                context.beginPath();
+
+                context.strokeStyle = d3.rgb(color(e.target.type)).toString();
+                context.lineWidth = sw(e.target.size) * edgeSizeFactor;
+
+                var xs = scale * e.source.x + delx,
+                    ys = scale * e.source.y + dely,
+                    xt = scale * e.target.x + delx,
+                    yt = scale * e.target.y + dely;
+
+                e.source.visibile = xs > 0 && xs < width && ys > 0 && ys < height;
+                e.target.visibile = xt > 0 && xt < width && yt > 0 && yt < height;
+
+                if (e.source.visibile || e.target.visibile) {
+                    context.moveTo(xs, ys);
+                    var x3 = .3 * yt - .3 * ys + .8 * xs + .2 * xt;
+                    var y3 = .8 * ys + .2 * yt - .3 * xt + .3 * xs;
+                    var x4 = .3 * yt - .3 * ys + .2 * xs + .8 * xt;
+                    var y4 = .2 * ys + .8 * yt - .3 * xt + .3 * xs;
+                    context.bezierCurveTo(x3, y3, x4, y4, xt, yt);
+                    context.stroke();
+                }
+            });*/
+
+            graph.nodes.forEach(function (d) {
+                var dx = scale * d.x + delx,
+                    dy = scale * d.y + dely;
+
+                d.visibile = dx > 0 && dx < width() && dy > 0 && dy < height();
+
+                if (d.visibile) {
+                    context.beginPath();
+                    context.fillStyle = d3.rgb(color(calcColor(d))).toString();
+                    context.strokeStyle = d3.rgb(color(calcColor(d))).darker().toString();
+                    context.lineWidth = sw(d.size) * edgeSizeFactor;
+                    if (d.type == 2) {
+                        var dh = i2[0][0].height * radius(d.size) * nodeSizeFactor,
+                            dw = i2[0][0].width * radius(d.size) * nodeSizeFactor;
+                        context.drawImage(i2[0][0], dx - dw / 2  , dy - dh / 2, dw, dh);
+                    }
+                    else if (d.type == 3) {
+                        var dh = i3[0][0].height * radius(d.size) * nodeSizeFactor,
+                            dw = i3[0][0].width * radius(d.size) * nodeSizeFactor;
+                        context.drawImage(i3[0][0], dx - dw / 2  , dy - dh / 2, dw, dh);
+                    }
+                    else if (d.type == 1) {
+                        var dh = i4[0][0].height * radius(d.size) * nodeSizeFactor,
+                            dw = i4[0][0].width * radius(d.size) * nodeSizeFactor;
+                        context.drawImage(i4[0][0], dx - dw / 2  , dy - dh / 2, dw, dh);
+                    }
+                    else if (d.type == 0) {
+                        var dh = i5[0][0].height * radius(d.size) * nodeSizeFactor,
+                            dw = i5[0][0].width * radius(d.size) * nodeSizeFactor;
+                        context.drawImage(i5[0][0], dx - dw / 2  , dy - dh / 2, dw, dh);
+                    }
+                    else
+                        context.arc(dx, dy, radius(d.size) * nodeSizeFactor, 0, Math.PI * 2, true);
+                    context.fill();
+                    context.stroke();
+                }
+            });
+        }
+        tick();
+    });
+</script>
+</body>
+</html>
