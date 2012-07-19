@@ -2,45 +2,63 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <style>
-        svg {
-            margin: 0 auto;
-            background: #444;
-            display: block;
-        }
-
-        .link line {
-            stroke: #696969;
-        }
-
-        .link path {
-            fill:none;
-        }
-
-        .link line.separator {
-            stroke: #fff;
-            stroke-width: 2px;
-        }
-
-        .node circle {
-            stroke: #000;
-            stroke-width: 1.5px;
-        }
-
-        .node text {
-            font: 10px sans-serif;
-            pointer-events: none;
-        }
-
-        canvas {
-            margin: 0 auto;
-            background: #444;
-            display: block;
-        }
-    </style>
+    <title>Space of Olympics Games</title>
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
     <script src="http://mbostock.github.com/d3/d3.v2.js?2.9.6"></script>
+    <link type="text/css" href="style.css?0" rel="stylesheet" />
+    <script type="text/javascript"></script>
+    <style></style>
+    <!--[if gte IE 9]>
+      <style type="text/css">
+        .gradient {
+           filter: none;
+        }
+      </style>
+    <![endif]-->
 </head>
 <body onload="init()">
+    <div id="about" class="popup">
+        <span>About</span>
+        <div>
+            <h1>Space of Olympics Games</h1>
+            <p>
+                I imagined that every Olympic game is a galaxy of stars...<br/>
+                And after some searching and thought it turned out that there are.<br/>
+                Good luck!<br/>
+                <hr>
+                If you have questions, then welcome to my email <a href="mailto:artzub@gmail.com">Artem Zubkov</a> =)
+            </p>
+            <h2></h2>
+            <p>
+            </p>
+            <h2>How to use</h2>
+            <p>
+                <ul>
+                    <li><strong>Scroll</strong> - increase / decrease
+                    <li>Button at top left change mode stars off or on.
+                </ul>
+            </p>
+        </div>
+    </div>
+    <div id="filters" class="popup">
+        <span>Filters</span>
+        <div>
+            <ul class="filtercont">
+                <li>
+                    <h3>Athletes</h3>
+                    <ul id="athletescont"></ul>
+                </li>
+                <li>
+                    <h3>Countries</h3>
+                    <ul id="countriescont"></ul>
+                </li>
+                <li>
+                    <h3>Sports</h3>
+                    <ul id="sportscont"></ul>
+                </li>
+            </ul>
+        </div>
+    </div>
     <svg
         xmlns:svg="http://www.w3.org/2000/svg"
         xmlns="http://www.w3.org/2000/svg"
@@ -99,7 +117,7 @@ var init = function() {
     var margin = {top:10, right:10, bottom:10, left:10},
         width = function() { return window.innerWidth - margin.left - margin.right },
         height = function() { return window.innerHeight - margin.top - margin.bottom },
-        zoomLevel = -6,
+        zoomLevel = -5.5,
         scale = Math.pow(Math.sqrt(2), zoomLevel),
         sizeFactor = scale * Math.pow(scale, -.15),
         edgeSizeFactor = sizeFactor,
@@ -110,7 +128,9 @@ var init = function() {
         delx = centerX - (centerX * scale),
         dely = centerY - (centerY * scale),
         lastTranslate = [0, 0],
-        showAsBall = false;
+        showAsBall = true,
+        showStat = false,
+        showLabelOnRoot = true;
 
 
     function resize() {
@@ -125,6 +145,8 @@ var init = function() {
     }
 
     var color = d3.scale.category20c();
+    var cAthletes = d3.scale.category20();
+    var cSports = d3.scale.category20();
 
     var cord = function(c, s) {
         return c - (c - c / s)
@@ -150,11 +172,17 @@ var init = function() {
     var svg = d3.select("body").select("svg")
             .attr("width", width)
             .attr("height", height)
+            .append("g")
+            .attr("width", width)
+            .attr("height", height)
             .call(zoom)
             .append("g")
             .attr("transform", "scale(1)translate(" + [0 , 0] + ")")
             .attr("width", width)
             .attr("height", height);
+
+    var svgnode = svg.append("g");
+    var svglabel = svg.append("g");
 
     var radius = d3.scale.sqrt()
             .range([0, 4]);
@@ -170,7 +198,7 @@ var init = function() {
 
         function zoomMove() {
 
-            if (repaintTimer) {
+            if (repaintTimer && !(lastZoom != s || lastTranslate[0] != t[0] || lastTranslate[1] != t[1])) {
                 clearTimeout(repaintTimer);
                 repaintTimer = false;
             }
@@ -190,9 +218,18 @@ var init = function() {
               .attr("transform", "scale(" + s + ")translate(" + [cord(t[0], s), cord(t[1], s)] + ")");
             if (lastZoom != s || lastTranslate[0] != t[0] || lastTranslate[1] != t[1])
                 repaintTimer = setTimeout(makeSmallStars, 500);
-            lastTranslate[0] = t[0];
-            lastTranslate[1] = t[1];
+            lastTranslate = t.slice(0);
             lastZoom = s;
+            refresh();
+        }
+
+        function refresh() {
+            svg.selectAll(".link path")
+               .style("stroke-width", function(m) { return sw(m.target().size) * nodeSizeFactor * 8/lastZoom });
+            svg.selectAll(".nodelabel")
+                    .style("font-size", 24 / lastZoom + "pt")
+                    .style("stroke-width", function(d) { return sw(d.size) * edgeSizeFactor / lastZoom})
+                    .style("visibility", function(d) {return d.type == 0 && showLabelOnRoot ? null : "hidden"});
         }
 
         var stars = {};
@@ -217,14 +254,15 @@ var init = function() {
         graph.nodes.forEach(function(d) {
             d.rx = elx(scale * d.x + delx, scale * d.y + dely),
             d.ry = ely(scale * d.y + dely, scale * d.x + delx, d.size, d.type);
+            d.date = new Date(d.date);
             color(calcColor(d));
             radius(d.size);
             sw(d.size);
         });
 
-        graph.links.forEach(function(d) {
-            d.si = d.source;
-            d.ti = d.target;
+        graph.edges.forEach(function(d) {
+            d.si = d.source.index;
+            d.ti = d.target.index;
             d.source = function() { return graph.nodes[this.si]; };
             d.target = function() { return graph.nodes[this.ti]; };
         });
@@ -245,7 +283,6 @@ var init = function() {
         }
 
         function tick_start() {
-            svg.selectAll(".node").style("visibility", "hidden");
         }
 
         function translateNode(node) {
@@ -265,16 +302,83 @@ var init = function() {
                     .attr("transform", function (d) {
                         return "scale(" + 0.05 * nodeSizeFactor * radius(d.size) + ")"
                     });
+
+            if (stars.firstGreatnessOver)
+                stars.firstGreatnessOver
+                    .attr("transform", function (d) {
+                        return "scale(" + 0.05 * nodeSizeFactor * radius(d.size) + ")"
+                    });
+
             if (stars.secondGreatness)
                 stars.secondGreatness
                     .attr("transform", function (d) {
                         return "scale(" + 0.05 * nodeSizeFactor * radius(d.size) + ")"
                     });
+            if (stars.secondGreatnessOver)
+                stars.secondGreatnessOver
+                        .attr("transform", function (d) {
+                            return "scale(" + 0.05 * nodeSizeFactor * radius(d.size) + ")"
+                        });
             if (stars.thirdGreatness)
                 stars.thirdGreatness
                     .attr("transform", function (d) {
                         return "scale(" + 0.1 * nodeSizeFactor * radius(d.size * d.tag.split(",").length) + ")"
                     });
+
+            if (stars.thirdGreatnessOver)
+                stars.thirdGreatnessOver
+                    .attr("transform", function (d) {
+                        return "scale(" + 0.5 * nodeSizeFactor * radius(d.size * d.tag.split(",").length) + ")"
+                    });
+        }
+
+        function showedges(d) {
+            hideedges(d);
+            var arr = [];
+            if (d instanceof Array) {
+                arr = d.slice(0);
+            }
+            else {
+                arr.push(d);
+            }
+
+
+            d = arr.pop();
+            while(d) {
+                graph.edges.
+                    filter(function(m) {
+                        return (m.si == d.index || m.ti == d.index) && m.target().visibile && m.source().visibile;
+                }).forEach(function(l) {
+                    svgnode
+                        .insert("g", ":first-child")
+                        .datum(l)
+                        .attr("class", "link")
+                        .append("path")
+                        .style("stroke", function(m) { return d3.rgb(color(calcColor(m.target())))/*.brighter()*/.toString(); })
+                        .style("stroke-width", function(m) { return sw(m.target().size) * nodeSizeFactor * 8/lastZoom })
+                        .attr("d", function(m) {
+                            var xs = m.source().rx,
+                                ys = m.source().ry,
+                                xt = m.target().rx,
+                                yt = m.target().ry;
+
+                            var x3 = .3 * yt - .3 * ys + .8 * xs + .2 * xt;
+                            var y3 = .8 * ys + .2 * yt - .3 * xt + .3 * xs;
+                            var x4 = .3 * yt - .3 * ys + .2 * xs + .8 * xt;
+                            var y4 = .2 * ys + .8 * yt - .3 * xt + .3 * xs;
+
+                            return "M " + xs + "," + ys + " C " + x3 + "," + y3 + " " + x4 + "," + y4 + " " + xt + "," + yt;
+                        });
+                })
+                svgnode.selectAll(".nodelabel").style("visibility", function(b) {
+                    return b.index == d.index ? null : d3.select(this).style("visibility")});
+                d = arr.pop();
+            }
+        }
+
+        function hideedges(d) {
+            svgnode.selectAll(".link").remove();
+            refresh();
         }
 
         function makeBigStars() {
@@ -294,23 +398,36 @@ var init = function() {
                     d.visibile = d.type < 2;
                 });
 
-            svg.selectAll(".nodebig").remove();
+            svgnode.selectAll(".nodesmall").remove();
+            svgnode.selectAll(".nodebig").remove();
 
-            var node = svg.selectAll(".nodebig")
+            var node = svgnode.selectAll(".nodebig")
                     .data(graph.nodes
                         .filter(function(d) {return d.visibile && d.type < 2;}))
                     .enter().append("g")
-                    .attr("class", "nodebig");
+                    .attr("class", "nodebig node")
+                    .on("mouseover", showedges)
+                    .on("mouseout", hideedges);
 
-            if (!stars.zeroGreatness)
-                makeStars(node.filter(function(d) { return d.type == 0 }), showAsBall ? 5 : 0);
-            if (!stars.firstGreatness)
-                makeStars(node.filter(function(d) { return d.type == 1 }), showAsBall ? 5 : 1);
+            if (!stars.zeroGreatness) {
+                stars.zeroGreatness = makeStars(node.filter(function(d) { return d.type == 0 }), showAsBall ? 5 : 0);
+                if (showAsBall)
+                    stars.zeroGreatness = false;
+            }
+            if (!stars.firstGreatness) {
+                stars.firstGreatness = makeStars(node.filter(function(d) { return d.type == 1 }), showAsBall ? 5 : 1);
+                if (showAsBall)
+                    stars.firstGreatness = false;
+            }
 
             translateNode(node);
+
+            if (lastZoom > 3)
+                makeSmallStars();
         }
 
         function makeSmallStars() {
+            repaintTimer = false;
             resize();
 
             svg.select("#stateCont")
@@ -321,11 +438,11 @@ var init = function() {
 
             proc = 0;
 
-            svg.selectAll(".nodesmall").filter(function(d) {
+            svgnode.selectAll(".nodesmall").filter(function(d) {
                 return !((d.type == 2 && lastZoom > 3) || (d.type == 3 && lastZoom > 5)) || !vis(d.rx, d.ry);
             }).remove();
 
-            node = svg.selectAll(".nodesmall");
+            node = svgnode.selectAll(".nodesmall");
 
             graph.nodes
                 .forEach(function(d) {
@@ -339,40 +456,56 @@ var init = function() {
                         needVis = d.visibile && !d.drawn;
                     }
                     if (needVis) {
-                        svg.append("g")
-                            .attr("class", "nodesmall")
+                        svgnode.append("g")
+                            .on("mouseover", showedges)
+                            .on("mouseout", hideedges)
+                            .attr("class", "nodesmall node")
                             .datum(d);
                     }
                 })
 
-            var node = svg.selectAll(".nodesmall");
+            var node = svgnode.selectAll(".nodesmall");
 
-            if (!stars.secondGreatness)
-                makeStars(node.filter(function(d) {
+            if (!stars.secondGreatness) {
+                stars.secondGreatness = makeStars(node.filter(function(d) {
                     return d.type == 2 && this.childNodes.length < 1
                 }), showAsBall ? 5 : 2);
-            if (!stars.thirdGreatness)
-                makeStars(node.filter(function(d) {
+                if (showAsBall)
+                    stars.secondGreatness = false;
+            }
+            if (!stars.thirdGreatness) {
+                stars.thirdGreatness = makeStars(node.filter(function(d) {
                     return d.type == 3 && this.childNodes.length < 1
                 }), showAsBall ? 5 : 3);
+                if (showAsBall)
+                    stars.thirdGreatness = false;
+            }
 
             translateNode(node);
         }
 
         function tick_end() {
+            makeLabel();
             makeBigStars();
         }
         setTimeout(tick_end, 10);
+        buttonStarOffOn();
+        buttonStat();
+        buttonLabelRoot();
+        initFilters("#athletescont", 3, stars.thirdGreatnessOver, 16, cAthletes);
+        initFilters("#sportscont", 1, stars.firstGreatnessOver, 2, cSports);
+
+        function makeLabel() {
+        }
 
         function makeStars(parent, typeStars) {
             if (!parent)
-                return;
+                return parent;
+
+            var newParent = parent;
 
             switch (typeStars) {
                 case 0 :
-                    if (stars.zeroGreatness)
-                        stars.zeroGreatness.remove();
-
                     var dpath = function(d) {
                         var cof = Math.random() * d.size * 0.01;
                         var coord = [[0,27.89459],
@@ -396,10 +529,10 @@ var init = function() {
                         return path + "z";
                     }
 
-                    stars.zeroGreatness = parent.append("g")
+                    newParent = parent.append("g")
                             .style("opacity", 0)
                             .attr("class", "stars2");
-                    stars.zeroGreatness.append("g")
+                    newParent.append("g")
                             .attr("transform", "translate(-140, -58)")
                             .append("g")
                             .attr("class", "outter")
@@ -415,7 +548,7 @@ var init = function() {
                             .style("opacity", 0.6)
                             .style("fill", function(d) { return color(calcColor(d)) })
                             .style("filter", "url(#filter3859)");
-                    stars.zeroGreatness.selectAll(".outter").append("path")
+                    newParent.selectAll(".outter").append("path")
                             .attr("transform", "matrix(-0.81901553,0.04016906,-0.02181049,-0.44469885,227.01302,84.54806)")
                             .attr("sodipodi:sodipodi:ry", "50.507626")
                             .attr("sodipodi:sodipodi:rx", "50.507626")
@@ -426,7 +559,7 @@ var init = function() {
                             .style("opacity", 0.7)
                             .style("fill", function(d) { return d3.rgb(color(calcColor(d))).brighter().toString() })
                             .style("filter", "url(#filter3859)");
-                    stars.zeroGreatness.selectAll(".outter").append("path")
+                    newParent.selectAll(".outter").append("path")
                             .attr("sodipodi:sodipodi:type", "star")
                             .attr("style", "fill:#ffffff;fill-opacity:1")
                             .attr("sodipodi:sodipodi:sides", "9")
@@ -438,7 +571,7 @@ var init = function() {
                             .attr("sodipodi:sodipodi:arg2", "1.6227373")
                             .attr("d", "m 418.93047,695.49552 -10.17002,-32.27978 -13.46246,31.05118 12.95836,-31.26491 -30.27215,15.13309 30.02337,-15.62084 -32.91717,-7.86594 33.04012,7.33239 -20.15989,-27.18441 20.59703,26.85472 2.03043,-33.783 -1.48364,33.81142 23.27069,-24.57413 -22.8701,24.94738 33.62234,-3.86677 -33.55538,4.41019 28.24172,18.64991 -28.53973,-18.19058 z")
                             .attr("transform", "matrix(0.60865681,-0.02610034,0.02610034,0.60865681,-125.24117,-338.82995)");
-                    stars.zeroGreatness.selectAll(".outter").append("path")
+                    newParent.selectAll(".outter").append("path")
                             .attr("sodipodi:sodipodi:type", "arc")
                             .attr("style", "fill:#ffffff;fill-opacity:1;filter:url(#filter3831)")
                             .style("fill", function(d) { return color(calcColor(d)) })
@@ -448,7 +581,7 @@ var init = function() {
                             .attr("sodipodi:sodipodi:ry", "50.507626")
                             .attr("d", "m 134.35028,75.54467 c 0,27.89459 -22.61303,50.50763 -50.507621,50.50763 -27.894591,0 -50.507626,-22.61304 -50.507626,-50.50763 0,-27.894591 22.613035,-50.507625 50.507626,-50.507625 27.894591,0 50.507621,22.613034 50.507621,50.507625 z")
                             .attr("transform", "matrix(0.1885681,0,0,0.1885681,124.60115,39.075996)");
-                    stars.zeroGreatness.selectAll(".outter").append("path")
+                    newParent.selectAll(".outter").append("path")
                             .attr("transform", "matrix(0.39032722,0,0,0.39032722,107.68513,23.83417)")
                             .attr("sodipodi:sodipodi:ry", "50.507626")
                             .attr("sodipodi:sodipodi:rx", "50.507626")
@@ -459,7 +592,7 @@ var init = function() {
                             .style("fill-opacity", 0.7)
                             .style("fill", "url(#radialGradient3982)")
                             .style("filter", "url(#filter3831)");
-                    stars.zeroGreatness.selectAll(".outter").append("path")
+                    newParent.selectAll(".outter").append("path")
                             .attr("transform", "matrix(0.39032722,0,0,0.39032722,107.68513,23.83417)")
                             .attr("sodipodi:sodipodi:ry", "50.507626")
                             .attr("sodipodi:sodipodi:rx", "50.507626")
@@ -470,17 +603,14 @@ var init = function() {
                             .style("fill-opacity", 0.7)
                             .style("fill", "url(#radialGradient3982)")
                             .style("filter", "url(#filter3831)");
-                    stars.zeroGreatness.transition()
+                    newParent.transition()
                             .delay(100)
                             .style("opacity", 1);
                     break;
                 case 1 :
-                    if (stars.firstGreatness)
-                        stars.firstGreatness.remove();
-
-                    stars.firstGreatness = parent.append("g")
+                    newParent = parent.append("g")
                             .attr("class", "stars1");
-                    stars.firstGreatness.append("g")
+                    newParent.append("g")
                             .attr("transform", "translate(-52, -52)")
                             .append("g")
                             .attr("class", "outter")
@@ -496,7 +626,7 @@ var init = function() {
                             .attr("sodipodi:sodipodi:sides", "8")
                             .attr("sodipodi:sodipodi:type", "star")
                             .attr("style", function(d) {return "fill:" + color(calcColor(d)) + ";filter:url(#filter5909)"});
-                    stars.firstGreatness.selectAll(".outter").append("path")
+                    newParent.selectAll(".outter").append("path")
                             .attr("d", "m 415.91347,628.69075 -28.03151,-12.30866 8.45434,30.26423 -11.11773,-28.5248 -15.42192,27.37816 12.30865,-28.0315 -30.26423,8.45433 28.52481,-11.11773 -27.37817,-15.42192 28.03151,12.30866 -8.45434,-30.26424 11.11773,28.52481 15.42193,-27.37816 -12.30866,28.0315 30.26423,-8.45434 -28.5248,11.11774 z")
                             .attr("sodipodi:sodipodi:arg2", "0.59955522")
                             .attr("sodipodi:sodipodi:arg1", "0.43587706")
@@ -510,10 +640,7 @@ var init = function() {
                             .attr("transform", "translate(-7.0792635e-6,0.86198797)");
                     break;
                 case 2 :
-                    if (stars.secondGreatness)
-                        stars.secondGreatness.remove();
-
-                    var defs = d3.selectAll("starsZeroGr");
+                    var defs = d3.selectAll("#starsZeroGr");
                     if (defs)
                         defs.remove();
                     defs = svg.append("defs").attr("id", "starsZeroGr");
@@ -547,10 +674,10 @@ var init = function() {
                         return "url(#rg_st_" + type + "_" + d.index + ")";
                     }
 
-                    stars.secondGreatness = parent.append("g")
+                    newParent = parent.append("g")
                             .attr("class", "stars0");
-                    stars.secondGreatness.append("g")
-                            .attr("transform", "translate(-102, -60)")
+                    newParent.append("g")
+                            .attr("transform", "translate(-98, -58)")
                             .append("g")
                             .attr("class", "outter")
                             .attr("transform", "translate(-309.89778,-605.66567)")
@@ -570,7 +697,7 @@ var init = function() {
                                            "filter:url(#filter6197)")
                             .style("fill", function(d) { return makeGrad(d, 0) })
                             .attr("sodipodi:sodipodi:type", "star");
-                    stars.secondGreatness.selectAll(".outter").append("path")
+                    newParent.selectAll(".outter").append("path")
                             .attr("sodipodi:sodipodi:type", "star")
                             .style("fill", function(d) { return color(curType = (calcColor(d))) })
                             .style("fill-opacity", "1")
@@ -582,7 +709,7 @@ var init = function() {
                             .attr("sodipodi:sodipodi:arg1", "1.2736714")
                             .attr("sodipodi:sodipodi:arg2", "1.6227373")
                             .attr("d", "m 418.93047,695.49552 -10.17002,-32.27978 -13.46246,31.05118 12.95836,-31.26491 -30.27215,15.13309 30.02337,-15.62084 -32.91717,-7.86594 33.04012,7.33239 -20.15989,-27.18441 20.59703,26.85472 2.03043,-33.783 -1.48364,33.81142 23.27069,-24.57413 -22.8701,24.94738 33.62234,-3.86677 -33.55538,4.41019 28.24172,18.64991 -28.53973,-18.19058 z");
-                    stars.secondGreatness.selectAll(".outter").append("path")
+                    newParent.selectAll(".outter").append("path")
                             .attr("sodipodi:type", "star")
                             .attr("style", "fill:url(#radialGradient6187);" +
                                            "fill-opacity:1;" +
@@ -599,14 +726,11 @@ var init = function() {
                             .attr("transform", "translate(10.469284,-0.46332952)");
                    break;
                 case 3 :
-                    if (stars.thirdGreatness)
-                        stars.thirdGreatness.remove();
-
-                    stars.thirdGreatness = parent.append("g")
+                    newParent = parent.append("g")
                             .attr("class", "stars3");
-                    stars.thirdGreatness.append("g")
+                    newParent.append("g")
                             .attr("class", "inner")
-                            .attr("transform", "translate(-21, -21)")
+                            .attr("transform", "translate(-25, -25)")
                             .append("g")
                             .attr("class", "outter")
                             .attr("transform", "translate(-1070.6413,-990.16135)")
@@ -618,7 +742,7 @@ var init = function() {
                                         .brighter()
                                         .toString()
                             });
-                    stars.thirdGreatness.selectAll(".outter").append("path")
+                    newParent.selectAll(".outter").append("path")
                             .attr("d", "m 1111.912,1017.213 c -0.219,9.782 -8.363,17.509 -18.111,17.287 -9.783,-0.222 -17.527,-8.35 -17.287,-18.132 0.221,-9.766 8.328,-17.51 18.113,-17.271 9.766,0.222 17.527,8.35 17.285,18.116 z")
                             .style("opacity", 0.2)
                             .style("fill", function(d) {
@@ -626,7 +750,7 @@ var init = function() {
                                         .brighter()
                                         .toString()
                             });
-                    stars.thirdGreatness.selectAll(".outter").append("path")
+                    newParent.selectAll(".outter").append("path")
                             .attr("d", "m 1107.834,1017.14 c -0.188,7.501 -6.422,13.462 -13.943,13.279 -7.52,-0.184 -13.459,-6.422 -13.293,-13.94 0.166,-7.539 6.418,-13.479 13.938,-13.296 7.521,0.166 13.46,6.418 13.298,13.957 z")
                             .style("opacity", 0.2)
                             .style("fill", function(d) {
@@ -634,12 +758,12 @@ var init = function() {
                                         .brighter()
                                         .toString()
                             });*/
-                    stars.thirdGreatness.selectAll(".outter").append("path")
+                    newParent.selectAll(".outter").append("path")
                             .style("opacity", 0.4)
                             .attr("d", "m 1102.371,1016.991 c -0.094,4.524 -3.828,8.093 -8.35,7.982 -4.541,-0.111 -8.094,-3.863 -7.982,-8.35 0.09,-4.524 3.844,-8.09 8.367,-7.979 4.524,0.09 8.076,3.826 7.965,8.347 z")
                             .style("fill", function(d) { return color(calcColor(d)) });
 
-                    stars.thirdGreatness.selectAll(".inner")
+                    newParent.selectAll(".inner")
                             .append("g")
                             .attr("class", "outter1")
                             .attr("transform", "matrix(0.95767353,0,0,0.95767353,-393.20808,-433.63763)")
@@ -655,7 +779,7 @@ var init = function() {
                                         .brighter()
                                         .toString()
                             });
-                    stars.thirdGreatness.selectAll(".outter1")
+                    newParent.selectAll(".outter1")
                             .append("g")
                             .attr("transform", "matrix(1.25,0,0,-1.25,111.99012,763.50118)")
                             .append("g")
@@ -675,7 +799,7 @@ var init = function() {
                             });
                     break;
                 default:
-                        parent.append("circle")
+                        newParent.append("circle")
                             .attr("r", 0)
                             .style("fill", function(d) { return color(calcColor(d)); })
                             .style("stroke", function(d) { return d3.rgb(color(calcColor(d))).darker().toString() })
@@ -686,6 +810,355 @@ var init = function() {
                             .attr("r", function(d) { return radius(d.size) * nodeSizeFactor; });
                     break;
             }
+            parent.append("text")
+                .attr("class", "nodelabel")
+                .attr("text-anchor", "middle")
+                .style("stroke", function(d) { return d3.rgb(color(calcColor(d))).darker().darker().toString() })
+                .style("fill", "#fff")
+                .text(function(d) { return d.label })
+                .attr("dy", ".35em")
+                .style("stroke-width", function(d) { return sw(d.size) * edgeSizeFactor / lastZoom})
+                .style("font-size", 24 / lastZoom + "pt")
+                .style("visibility", function(d) { return d.type == 0 && showLabelOnRoot ? null : "hidden"});
+
+            return newParent;
+        }
+
+        var timerClick = false;
+        function buttonStarOffOn() {
+            var but = d3.select("body").select("svg").selectAll("#starOnOff")
+                        .data([{check : !showAsBall}])
+                        .enter()
+                        .append("g")
+                        .attr("transform", "scale(1)translate(33, 20)")
+                        .attr("id", "starOnOff")
+                        .attr("class", "button")
+                    .on("click", function(d) {
+                        d.check = !d.check;
+                        showAsBall = !d.check;
+                        if (timerClick) {
+                            clearTimeout(timerClick);
+                            timerClick = false;
+                        }
+                        timerClick = setTimeout(tick_end, 500);
+
+                        if (showAsBall)
+                            toCircle();
+                        else
+                            toStar();
+
+                        var item = d3.select(this);
+                        item.select("title").text("stars " + (!showAsBall ? "off" : "on"));
+                        item.select("text").text("stars " + (showAsBall ? "off" : "on"));
+                        item.select(".outter").selectAll("path")
+                                .style("fill", !showAsBall ? "#90E89B" : "#FBA09C");
+                        item.select(".outter1").selectAll("path")
+                                .style("fill", d3.rgb(!showAsBall ?  "#90E89B" : "#FBA09C")
+                                    .brighter()
+                                    .brighter()
+                                    .brighter()
+                                    .toString());
+                    });
+            but.append("title").text("stars " + (!showAsBall ? "off" : "on"));
+            but.append("text")
+                    .style("fill", "#fff")
+                    .attr("dy", "30px")
+                    .attr("dx", "5px")
+                    .attr("text-anchor", "middle")
+                    .text("stars " + (showAsBall ? "off" : "on"));
+
+            function toStar() {
+                but.selectAll("g").remove();
+                but.append("g")
+                    .attr("class", "inner")
+                    .attr("transform", "translate(-18, -21)")
+                    .append("g")
+                    .attr("class", "outter")
+                    .attr("transform", "translate(-1070.6413,-990.16135)")
+                but.selectAll(".outter").append("path")
+                    .style("opacity", 0.4)
+                    .attr("d", "m 1102.371,1016.991 c -0.094,4.524 -3.828,8.093 -8.35,7.982 -4.541,-0.111 -8.094,-3.863 -7.982,-8.35 0.09,-4.524 3.844,-8.09 8.367,-7.979 4.524,0.09 8.076,3.826 7.965,8.347 z")
+                    .style("fill", !showAsBall ? "#90E89B" : "#FBA09C");
+                but.selectAll(".inner")
+                    .append("g")
+                    .attr("class", "outter1")
+                    .attr("transform", "matrix(0.95767353,0,0,0.95767353,-393.20808,-433.63763)")
+                    .append("g")
+                    .attr("transform", "matrix(1.25,0,0,-1.25,452.07562,480.62886)")
+                    .append("path")
+                    .attr("d", "M 0,0 C -14.945,0.799 -14.298,1.447 -13.5,-13.5 -12.701,1.447 -12.053,0.799 -27.001,0 -12.053,-0.799 -12.701,-1.446 -13.5,13.5 -14.298,-1.446 -14.945,-0.799 0,0")
+                    .attr("style", "fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none")
+                    .style("fill", function(d) {
+                        return d3.rgb(!showAsBall ?  "#90E89B" : "#FBA09C")
+                                .brighter()
+                                .brighter()
+                                .brighter()
+                                .toString()
+                    });
+                but.selectAll(".outter1")
+                    .append("g")
+                    .attr("transform", "matrix(1.25,0,0,-1.25,111.99012,763.50118)")
+                    .append("g")
+                    .attr("clip-path", "url(#clipPath116341)")
+                    .style("opacity", "0.5")
+                    .append("g")
+                    .attr("transform", "translate(262.6494,226.2979)")
+                    .append("path")
+                    .attr("d", "m 0,0 c 0,-2.252 -1.829,-4.08 -4.079,-4.08 -2.255,0 -4.083,1.828 -4.083,4.08 0,2.253 1.828,4.079 4.083,4.079 C -1.829,4.079 0,2.253 0,0")
+                    .attr("style", "fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none")
+                    .style("fill", function(d) {
+                        return d3.rgb(!showAsBall ?  "#90E89B" : "#FBA09C")
+                                .brighter()
+                                .brighter()
+                                .brighter()
+                                .toString()
+                    });
+            }
+
+            function toCircle() {
+                but.selectAll("g").remove();
+                but.append("g")
+                    .attr("transform", "translate(5, 5)")
+                    .append("circle")
+                    .style("fill", !showAsBall ? "#90E89B" : "#FBA09C")
+                    .style("stroke", d3.rgb(!showAsBall ? "#90E89B" : "#FBA09C").darker().toString())
+                    .style("stroke-width", 1.5)
+                    .attr("r", 10);
+            }
+
+            if (showAsBall)
+                toCircle();
+            else
+                toStar();
+        }
+
+        var timerStat = false;
+        function buttonStat() {
+            var but = d3.select("body").select("svg").selectAll("#statOffOn")
+                .data([{check : false}])
+                .enter()
+                .append("g")
+                .attr("transform", "scale(1)translate(20, 80)")
+                .attr("id", "statOffOn")
+                .attr("class", "button")
+                    .on("click", function(d) {
+                        var item = d3.select(this);
+                        d.check = !d.check;
+                        if (d.check)
+                            show();
+                        else
+                            hide();
+                        chTxt(item);
+                    });
+
+            function chTxt(item) {
+                item.select("title")
+                    .text(function(d) {return "statistics " + (!d.check ? "show" : "hide")});
+                item.select("text")
+                    .text(function(d) {return "statistics " + (!d.check ? "show" : "hide")});
+            }
+
+            but.append("title");
+            but.append("text")
+                    .style("fill", "#fff")
+                    .attr("dy", "30px")
+                    .attr("dx", "20px")
+                    .attr("text-anchor", "middle");
+            chTxt(but);
+
+            but = but.append("g")
+                    .attr("transform", "scale(0.8)translate(2,-22)");
+            but.append("rect")
+                    .attr("y", "-2.7421434")
+                    .attr("x", "-2.5253813")
+                    .attr("height", "47.477169")
+                    .attr("width", "53.033009")
+                    .attr("style", "fill:#000000;fill-opacity:0.1;stroke:none");
+            but.append("path")
+                    .attr("d", "M 1.515229,41.199484 13.131983,13.420289 17.67767,23.016738 38.385797,9.379679")
+                    .attr("style", "fill:none;stroke:#B5E2F7;stroke-width:1px;");
+            but.append("path")
+                    .attr("d", "m 0.505076,15.945671 4.545687,6.060915 2.525381,12.626907 15.152288,-3.535534 9.596449,-12.121831 6.565992,14.647212")
+                    .attr("style", "fill:none;stroke:#00ff00;stroke-width:1px");
+            but.append("path")
+                    .attr("d", "m 38.385797,37.411411 c 0,3.486824 -2.6005,6.313453 -5.808378,6.313453 -3.207878,0 -5.808377,-2.826629 -5.808377,-6.313453 0,-3.486824 2.600499,-6.313453 5.808377,-6.313453 3.207878,0 5.808378,2.826629 5.808378,6.313453 z")
+                    .attr("transform", "matrix(0.59999999,0,0,0.59999999,-0.101015,-7.763867)")
+                    .attr("style", "fill:#c83737");
+            but.append("path")
+                    .attr("d", "m 45.456866,59.382229 c 0,2.510513 -1.809043,4.545686 -4.04061,4.545686 -2.231568,0 -4.04061,-2.035173 -4.04061,-4.545686 0,-2.510513 1.809042,-4.545686 4.04061,-4.545686 2.231567,0 4.04061,2.035173 4.04061,4.545686 z")
+                    .attr("transform", "translate(-10.606602,-28.284271)")
+                    .attr("style", "fill:#ffff00");
+            but.append("path")
+                    .attr("d", "m 1.515229,0.288307 -1.010153,41.416254 0,0 46.972093,-1.010153")
+                    .attr("style", "fill:none;stroke:#a8afbd;stroke-width:1px;");
+
+
+            function show() {
+                resize();
+                divstat = d3.select("body")
+                        .insert("div", ":first-child")
+                        .style("width", width() - 40 * 2 + "px")
+                        .style("height", height() - 40 * 1.6 + "px")
+                        .attr("id", "statwindow")
+                        .style("top", "40px")
+                        .style("left", "40px");
+            }
+
+            function hide() {
+                d3.select("#statwindow").remove();
+            }
+        }
+
+        function buttonLabelRoot() {
+            var but = d3.select("body").select("svg").selectAll("#labelRootOffOn")
+                .data([{check : showLabelOnRoot}])
+                .enter()
+                .append("g")
+                .attr("transform", "scale(1)translate(37, 140)")
+                .attr("id", "labelRootOffOn")
+                .attr("class", "button")
+                    .on("click", function(d) {
+                        var item = d3.select(this);
+                        showLabelOnRoot = d.check = !d.check;
+                        chTxt(item);
+                        refresh();
+                    });
+
+            function chTxt(item) {
+                item.select("title")
+                    .text(function(d) {return (!d.check ? "show" : "hide") + " label on games"});
+                item.select("text")
+                    .text(function(d) {return (!d.check ? "show" : "hide")});
+            }
+
+            but.append("title");
+            but.append("text")
+                    .style("fill", "#fff")
+                    .attr("dy", "20px")
+                    .attr("text-anchor", "middle");
+            but.append("text")
+                    .attr("y","0")
+                    .attr("x","0")
+                    .attr("text-anchor", "middle")
+                    .attr("style", "font-size:24px;font-weight:bold;line-height:125%;fill:#aaaaff;fill-opacity:1;stroke:none;opacity:1")
+                    .text("label");
+            chTxt(but);
+        }
+
+        var timerOpHighLow = false;
+
+        function hideSelectedNode(d) {
+            if (timerOpHighLow) {
+                clearTimeout(timerOpHighLow);
+                timerOpHighLow = false;
+            }
+
+            var havevis = svgnode.selectAll(".overnode").length > 0;
+            svgnode.selectAll(".overnode").remove();
+            if (havevis)
+                timerOpHighLow = setTimeout(function () {
+                    svgnode.selectAll(".node")
+                            .style("opacity", 1);
+                }, 200);
+            hideedges();
+        }
+
+        function showSelectedNode(m, conteiner, typeNode) {
+            if (timerOpHighLow) {
+                clearTimeout(timerOpHighLow);
+                timerOpHighLow = false;
+            }
+
+            resize();
+
+            proc = 0;
+
+            conteiner = false;
+
+            svgnode.selectAll(".overnode").remove();
+
+            var havevis = false;
+
+            m.values
+                    .forEach(function (d) {
+                        d.visibile = vis(d.rx, d.ry);
+                        if (havevis = d.visibile) {
+                            svgnode.append("g")
+                                    .on("mouseover", showedges)
+                                    .on("mouseout", hideedges)
+                                    .attr("class", "overnode")
+                                    .datum(d);
+                        }
+                    })
+
+            var node = svgnode.selectAll(".overnode");
+
+            if (!conteiner) {
+                conteiner = makeStars(node.filter(function (d) {
+                    return d.type == typeNode && this.childNodes.length < 1
+                }), showAsBall ? 5 : typeNode);
+                if (showAsBall)
+                    conteiner = false;
+            }
+
+
+            translateNode(node);
+            refresh();
+            if (havevis)
+                timerOpHighLow = setTimeout(function () {
+                    svgnode.selectAll(".node")
+                            .style("opacity", .3);
+                }, 200);
+            showedges(m.values);
+        }
+
+        function initFilters(id, typeNode, nodeObject, paddingCoff, colors) {
+            d3.select(id)
+                    .selectAll("li")
+                    .data(d3.nest()
+                        .key(function(d) { return d.label; })
+                        .entries(graph.nodes
+                        .filter(function(d) { return d.type == typeNode; })
+                        .sort(function(a, b) { return d3.ascending(a.label, b.label); }))
+                    )
+                    .enter().append("li")
+                    .append("a")
+                    .attr("href", function(d) {
+                        return "#" + d.key;
+                    })
+                    .html(function(d) { return "<span>" + d.key + "</span>"})
+                    .on("click", function() {
+                        d3.event.preventDefault();
+                    })
+                    .on("mouseover", function(m) {
+                        showSelectedNode(m, nodeObject, typeNode);
+                    })
+                    .on("mouseout", hideSelectedNode)
+                    .insert("span", ":first-child")
+                    .text(function(d) {
+                        return d.values.length;
+                    })
+                    .style("background", function(d) {
+                        return colors(d.values.length);
+                    })
+                    .style("border-color", function(d) {
+                        return d3.rgb(colors(d.values.length)).darker().darker().darker().toString();
+                    })
+                    .style("padding-left", function(d) {
+                        return d.values.length * paddingCoff + "px";
+                    });
+            d3.select(d3.select(id).node().parentNode)
+                    .select("h3")
+                    .style("cursor", "pointer")
+                    .on("click", function(d) {
+                        d3.select(this.parentNode)
+                                .classed("show", function() {
+                                    var s = d3.select(this).classed("show") ? false : true;
+                                    d3.select(this.parentNode)
+                                        .selectAll("li.show").classed("show", false);
+                                    return s;
+                                });
+                    });
         }
     });
 }
