@@ -17,46 +17,54 @@
     <![endif]-->
 </head>
 <body onload="init()">
-    <div id="about" class="popup">
-        <span>About</span>
-        <div>
-            <h1>Space of Olympics Games</h1>
-            <p>
-                I imagined that every Olympic game is a galaxy of stars...<br/>
-                And after some searching and thought it turned out that there are.<br/>
-                Good luck!<br/>
-                <hr>
-                If you have questions, then welcome to my email <a href="mailto:artzub@gmail.com">Artem Zubkov</a> =)
-            </p>
-            <h2></h2>
-            <p>
-            </p>
-            <h2>How to use</h2>
-            <p>
-                <ul>
-                    <li><strong>Scroll</strong> - increase / decrease
-                    <li>Button at top left change mode stars off or on.
-                </ul>
-            </p>
+    <div id="statcont" class="outer" style="display: none">
+        <div id="statwindow" class="popup">
         </div>
     </div>
-    <div id="filters" class="popup">
-        <span>Filters</span>
-        <div>
-            <ul class="filtercont">
-                <li>
-                    <h3>Athletes</h3>
-                    <ul id="athletescont"></ul>
-                </li>
-                <li>
-                    <h3>Countries</h3>
-                    <ul id="countriescont"></ul>
-                </li>
-                <li>
-                    <h3>Sports</h3>
-                    <ul id="sportscont"></ul>
-                </li>
-            </ul>
+    <div id="aboutcont" class="outer">
+        <div id="about" class="popup">
+            <span>About</span>
+            <div>
+                <h1>Space of Olympics Games</h1>
+                <p>
+                    I imagined that every Olympic game is a galaxy of stars...<br/>
+                    And after some searching and thought it turned out that there are.<br/>
+                    Good luck!<br/>
+                    <hr>
+                    If you have questions, then welcome to my email <a href="mailto:artzub@gmail.com">Artem Zubkov</a> =)
+                </p>
+                <h2></h2>
+                <p>
+                </p>
+                <h2>How to use</h2>
+                <p>
+                    <ul>
+                        <li><strong>Scroll</strong> - increase / decrease
+                        <li>Button at top left change mode stars off or on.
+                    </ul>
+                </p>
+            </div>
+        </div>
+    </div>
+    <div id="filterscont" class="outer">
+        <div id="filters" class="popup">
+            <span>Filters</span>
+            <div>
+                <ul class="filtercont">
+                    <li>
+                        <h3>Athletes</h3>
+                        <ul id="athletescont"></ul>
+                    </li>
+                    <li>
+                        <h3>Countries</h3>
+                        <ul id="countriescont"></ul>
+                    </li>
+                    <li>
+                        <h3>Sports</h3>
+                        <ul id="sportscont"></ul>
+                    </li>
+                </ul>
+            </div>
         </div>
     </div>
     <svg
@@ -114,7 +122,7 @@
     </svg>
 <script>
 var init = function() {
-    var margin = {top:10, right:10, bottom:10, left:10},
+    var margin = {top:0, right:0, bottom:0, left:0},
         width = function() { return window.innerWidth - margin.left - margin.right },
         height = function() { return window.innerHeight - margin.top - margin.bottom },
         zoomLevel = -5.5,
@@ -131,6 +139,13 @@ var init = function() {
         showAsBall = true,
         showStat = false,
         showLabelOnRoot = true;
+
+
+    var params = document.location.search.replace(/^\?/, "").split("&");
+
+    var drawGraph = params.indexOf("nograph") < 0,
+        showStatOnLoad = params.indexOf("showstatonload") > -1;
+
 
 
     function resize() {
@@ -170,6 +185,7 @@ var init = function() {
             .scaleExtent([0.1, 8]);
 
     var svg = d3.select("body").select("svg")
+            .attr("id", "mainsvg")
             .attr("width", width)
             .attr("height", height)
             .append("g")
@@ -251,21 +267,35 @@ var init = function() {
             .attr("text-anchor", "middle")
             .text("Completed");
 
-        graph.nodes.forEach(function(d) {
-            d.rx = elx(scale * d.x + delx, scale * d.y + dely),
-            d.ry = ely(scale * d.y + dely, scale * d.x + delx, d.size, d.type);
-            d.date = new Date(d.date);
-            color(calcColor(d));
-            radius(d.size);
-            sw(d.size);
-        });
-
         graph.edges.forEach(function(d) {
             d.si = d.source.index;
             d.ti = d.target.index;
             d.source = function() { return graph.nodes[this.si]; };
             d.target = function() { return graph.nodes[this.ti]; };
         });
+
+        var haveDate = [];
+        graph.nodes.forEach(function(d) {
+            d.rx = elx(scale * d.x + delx, scale * d.y + dely),
+            d.ry = ely(scale * d.y + dely, scale * d.x + delx, d.size, d.type);
+            d.date = new Date(d.date);
+            d.country = !d.country ? {name:"",abbr:""} : {
+                name : d.country.split('|')[0],
+                abbr : d.country.split('|')[1]
+            };
+            if (haveDate.indexOf(d.date.getFullYear()) < 0)
+                haveDate.push(d.date.getFullYear());
+            /*d.edges = {
+                in : graph.edges.filter(function(k) { return k.ti == d.index; }),
+                out : graph.edges.filter(function(k) { return k.si == d.index; })
+            }*/
+            color(calcColor(d));
+            radius(d.size);
+            sw(d.size);
+        });
+        var realDate = haveDate.slice(0);
+        if (haveDate.length > 0)
+            haveDate.push((new Date("01.01." + (4 + parseInt(haveDate[haveDate.length - 1])))).getFullYear());
 
         function elx(x, y) {
             return x;//Math.sqrt(Math.pow(y * 0.1, 3) + 150 * 0.1 * y + 50);
@@ -354,7 +384,7 @@ var init = function() {
                         .datum(l)
                         .attr("class", "link")
                         .append("path")
-                        .style("stroke", function(m) { return d3.rgb(color(calcColor(m.target())))/*.brighter()*/.toString(); })
+                        .style("stroke", function(m) { return d3.rgb(color(calcColor(m.target())))/*.brighter()*/; })
                         .style("stroke-width", function(m) { return sw(m.target().size) * nodeSizeFactor * 8/lastZoom })
                         .attr("d", function(m) {
                             var xs = m.source().rx,
@@ -488,12 +518,19 @@ var init = function() {
             makeLabel();
             makeBigStars();
         }
-        setTimeout(tick_end, 10);
         buttonStarOffOn();
-        buttonStat();
         buttonLabelRoot();
-        initFilters("#athletescont", 3, stars.thirdGreatnessOver, 16, cAthletes);
-        initFilters("#sportscont", 1, stars.firstGreatnessOver, 2, cSports);
+        buttonStat();
+
+        if (drawGraph) {
+            setTimeout(tick_end, 10);
+            setTimeout(function() {
+                initFilters("#athletescont", 3, stars.thirdGreatnessOver, 16, cAthletes);
+            }, 1500);
+            setTimeout(function() {
+                initFilters("#sportscont", 1, stars.firstGreatnessOver, 2, cSports);
+            }, 1500);
+        }
 
         function makeLabel() {
         }
@@ -557,7 +594,7 @@ var init = function() {
                             .attr("sodipodi:sodipodi:type", "arc")
                             .attr("d", "m 134.35028,75.54467 c 0,27.89459 -22.61303,50.50763 -50.507621,50.50763 -27.894591,0 -50.507626,-22.61304 -50.507626,-50.50763 0,-27.894591 22.613035,-50.507625 50.507626,-50.507625 27.894591,0 50.507621,22.613034 50.507621,50.507625 z")
                             .style("opacity", 0.7)
-                            .style("fill", function(d) { return d3.rgb(color(calcColor(d))).brighter().toString() })
+                            .style("fill", function(d) { return d3.rgb(color(calcColor(d))).brighter() })
                             .style("filter", "url(#filter3859)");
                     newParent.selectAll(".outter").append("path")
                             .attr("sodipodi:sodipodi:type", "star")
@@ -635,7 +672,7 @@ var init = function() {
                             .attr("sodipodi:sodipodi:cy", "614.0368")
                             .attr("sodipodi:sodipodi:cx", "384.45059")
                             .attr("sodipodi:sodipodi:sides", "8") //#deffff
-                            .attr("style", function(d) {return "fill:" + d3.rgb(color(calcColor(d))).brighter().toString() + ";fill-opacity:1;filter:url(#filter4888-1)"})
+                            .attr("style", function(d) {return "fill:" + d3.rgb(color(calcColor(d))).brighter() + ";fill-opacity:1;filter:url(#filter4888-1)"})
                             .attr("sodipodi:sodipodi:type", "star")
                             .attr("transform", "translate(-7.0792635e-6,0.86198797)");
                     break;
@@ -740,7 +777,7 @@ var init = function() {
                             .style("fill", function(d) {
                                 return d3.rgb(color(calcColor(d)))
                                         .brighter()
-                                        .toString()
+
                             });
                     newParent.selectAll(".outter").append("path")
                             .attr("d", "m 1111.912,1017.213 c -0.219,9.782 -8.363,17.509 -18.111,17.287 -9.783,-0.222 -17.527,-8.35 -17.287,-18.132 0.221,-9.766 8.328,-17.51 18.113,-17.271 9.766,0.222 17.527,8.35 17.285,18.116 z")
@@ -748,7 +785,7 @@ var init = function() {
                             .style("fill", function(d) {
                                 return d3.rgb(color(calcColor(d)))
                                         .brighter()
-                                        .toString()
+
                             });
                     newParent.selectAll(".outter").append("path")
                             .attr("d", "m 1107.834,1017.14 c -0.188,7.501 -6.422,13.462 -13.943,13.279 -7.52,-0.184 -13.459,-6.422 -13.293,-13.94 0.166,-7.539 6.418,-13.479 13.938,-13.296 7.521,0.166 13.46,6.418 13.298,13.957 z")
@@ -756,7 +793,7 @@ var init = function() {
                             .style("fill", function(d) {
                                 return d3.rgb(color(calcColor(d)))
                                         .brighter()
-                                        .toString()
+
                             });*/
                     newParent.selectAll(".outter").append("path")
                             .style("opacity", 0.4)
@@ -777,7 +814,7 @@ var init = function() {
                                         .brighter()
                                         .brighter()
                                         .brighter()
-                                        .toString()
+
                             });
                     newParent.selectAll(".outter1")
                             .append("g")
@@ -795,14 +832,14 @@ var init = function() {
                                         .brighter()
                                         .brighter()
                                         .brighter()
-                                        .toString()
+
                             });
                     break;
                 default:
                         newParent.append("circle")
                             .attr("r", 0)
                             .style("fill", function(d) { return color(calcColor(d)); })
-                            .style("stroke", function(d) { return d3.rgb(color(calcColor(d))).darker().toString() })
+                            .style("stroke", function(d) { return d3.rgb(color(calcColor(d))).darker() })
                             .style("stroke-width", function(d) { return sw(d.size) * edgeSizeFactor})
                             .transition()
                             .delay(100)
@@ -813,7 +850,7 @@ var init = function() {
             parent.append("text")
                 .attr("class", "nodelabel")
                 .attr("text-anchor", "middle")
-                .style("stroke", function(d) { return d3.rgb(color(calcColor(d))).darker().darker().toString() })
+                .style("stroke", function(d) { return d3.rgb(color(calcColor(d))).darker().darker() })
                 .style("fill", "#fff")
                 .text(function(d) { return d.label })
                 .attr("dy", ".35em")
@@ -826,7 +863,7 @@ var init = function() {
 
         var timerClick = false;
         function buttonStarOffOn() {
-            var but = d3.select("body").select("svg").selectAll("#starOnOff")
+            var but = d3.select("body").select("#mainsvg").selectAll("#starOnOff")
                         .data([{check : !showAsBall}])
                         .enter()
                         .append("g")
@@ -857,7 +894,7 @@ var init = function() {
                                     .brighter()
                                     .brighter()
                                     .brighter()
-                                    .toString());
+                                    );
                     });
             but.append("title").text("stars " + (!showAsBall ? "off" : "on"));
             but.append("text")
@@ -893,7 +930,7 @@ var init = function() {
                                 .brighter()
                                 .brighter()
                                 .brighter()
-                                .toString()
+
                     });
                 but.selectAll(".outter1")
                     .append("g")
@@ -911,7 +948,6 @@ var init = function() {
                                 .brighter()
                                 .brighter()
                                 .brighter()
-                                .toString()
                     });
             }
 
@@ -921,7 +957,7 @@ var init = function() {
                     .attr("transform", "translate(5, 5)")
                     .append("circle")
                     .style("fill", !showAsBall ? "#90E89B" : "#FBA09C")
-                    .style("stroke", d3.rgb(!showAsBall ? "#90E89B" : "#FBA09C").darker().toString())
+                    .style("stroke", d3.rgb(!showAsBall ? "#90E89B" : "#FBA09C").darker())
                     .style("stroke-width", 1.5)
                     .attr("r", 10);
             }
@@ -934,14 +970,14 @@ var init = function() {
 
         var timerStat = false;
         function buttonStat() {
-            var but = d3.select("body").select("svg").selectAll("#statOffOn")
-                .data([{check : false}])
+            var but = d3.select("body").select("#mainsvg").selectAll("#statOffOn")
+                .data([{check : showStatOnLoad}])
                 .enter()
                 .append("g")
                 .attr("transform", "scale(1)translate(20, 80)")
                 .attr("id", "statOffOn")
                 .attr("class", "button")
-                    .on("click", function(d) {
+                    .on("click", function (d) {
                         var item = d3.select(this);
                         d.check = !d.check;
                         if (d.check)
@@ -992,25 +1028,499 @@ var init = function() {
                     .attr("d", "m 1.515229,0.288307 -1.010153,41.416254 0,0 46.972093,-1.010153")
                     .attr("style", "fill:none;stroke:#a8afbd;stroke-width:1px;");
 
+            var divstat = d3.select("#statcont")
+                    .style("display", "none")
+                    .style("top", "80px")
+                    .style("left", "80px");
+            divstat.select("div:first-child")
+                    .style("opacity", 1);
+
+            var w = width() - 290,
+                h = height() - 290,
+                ma = {top: 40, right: 40, bottom: 40, left: 40};
+
+            var svgstat = divstat.select("div:first-child").append("svg")
+                    .attr("width", w + ma.left + ma.right)
+                    .attr("height", h + ma.top + ma.bottom);
+
+            // sport countries to medals
+            var sCTM = function() {
+                var dataset = false;
+                var curYear = [-1,0,1];
+                var hm = h / 1.8,
+                    ha = h / 3;
+
+
+
+                var r = function(k) {
+                            var i = (k.values[haveDate[curYear[1]]] || 0) - 1;
+                            return i >= 0 ? k.values[i].cType2s.length : 0;
+                        },
+                    x = function(k, ind, data, i) {
+                            if (arguments.length < 4)
+                                i = (k.values[haveDate[curYear[1]]] || 0) - 1;
+                            else
+                                i = (k.values[haveDate[i]] || 0) - 1;
+                            return i >= 0 ? k.values[i].cType3s.length : 0;
+                        },
+                    y = function(k, ind, data, i) {
+                            if (arguments.length < 4)
+                                i = (k.values[haveDate[curYear[1]]] || 0) - 1;
+                            else
+                                i = (k.values[haveDate[i]] || 0) - 1;
+                            return i >= 0 ? d3.keys(k.values[i].countries).length : 0;
+                        };
+
+                var xScale = d3.scale.linear()
+                            .range([0, w]),
+                    yScale = d3.scale.linear()
+                            .range([hm, 0]),
+                    rScale = d3.scale.sqrt()
+                            .range([0, 20]),
+                    cScale = d3.scale.category20(),
+                    xYearScale = d3.scale.linear()
+                            .domain(d3.extent(haveDate))
+                            .range([0, w]),
+                    xAdYearScale = d3.scale.linear()
+                            .domain(d3.extent(haveDate))
+                            .range([0, w/2]),
+                    yAdScaleC = d3.scale.linear()
+                            .range([ha, ha / 3]),
+                    yAdScaleM = d3.scale.linear()
+                            .range([ha, 0]);
+
+
+                var position = function(item) {
+                    item.transition()
+                        .delay(500)
+                        .duration(500)
+                            .attr("transform", function(k) { return "translate(" + [xScale(x(k)), yScale(y(k))] + ")"; })
+                            .select("circle")
+                            .duration(500)
+                            .attr("r", function(k) {
+                                return rScale(r(k));
+                            });
+                }
+
+                var comp = function(a, b) {
+                    return r(b) - r(a);
+                }
+
+                var xAxis = d3.svg.axis().orient("bottom").scale(xScale).ticks(20, d3.format(",d")),
+                    yAxis = d3.svg.axis().scale(yScale).orient("left"),
+                    xYsAxis = d3.svg.axis().orient("bottom").scale(xYearScale).tickFormat(d3.format("d"))
+                            .tickValues(haveDate),
+                    xAdYsAxis = d3.svg.axis().orient("bottom").scale(xAdYearScale).tickFormat(d3.format("d"))
+                            //.tickValues(haveDate)
+                            .ticks(10);
+
+                var svgchart,
+                    svgYearsLine,
+                    svgadchart,
+                    sportLabel,
+                    x_axis,
+                    y_axis,
+                    dots,
+                    runner,
+                    areaC,
+                    areaM,
+                    lineC,
+                    lineM;
+
+                function sCTM() {
+                    var item = this;
+
+                    svgYearsLine = item.append("g")
+                        .attr("width", w)
+                        .attr("height", ma.top / 2)
+                        .attr("transform", "translate(" + [ma.left , ma.top + ma.top / 2 + hm] + ")")
+                        .call(d3.behavior.drag().on("drag", function() {
+                            var newX = +runner.attr("x") + d3.event.dx;
+                            if (newX < xYearScale(haveDate[0]))
+                                newX = xYearScale(haveDate[0]);
+                            if (newX > xYearScale(haveDate[haveDate.length - 2]))
+                                newX = xYearScale(haveDate[haveDate.length - 2]);
+
+                            var xp = xYearScale(haveDate[curYear[0]]),
+                                xc = xYearScale(haveDate[curYear[1]]),
+                                xn = xYearScale(haveDate[curYear[2]]);
+
+                            var dw = runner.attr("width") / 3,
+                                xwd = +runner.attr("x") + dw;
+
+                            runner
+                                .attr("x", newX);
+
+                            if (xwd > xn)
+                                recalcDate(haveDate[curYear[2]]);
+                            else if (xwd < xc)
+                                recalcDate(haveDate[curYear[0]]);
+                        })
+                        .on("dragend", function() {
+                            resizeRunner();
+                        }));
+                    svgYearsLine.append("g")
+                        .attr("class", "x axis")
+                        .attr("transform", "translate(" + [0, 10] + ")")
+                        .call(xYsAxis);
+
+                    function resizeRunner() {
+                        runner
+                            .transition()
+                            .duration(150)
+                            .attr("x", xYearScale(haveDate[curYear[1]]))
+                            .attr("width", xYearScale(haveDate[curYear[2]]) - xYearScale(haveDate[curYear[1]]))
+                    }
+
+                    svgYearsLine.selectAll(".runnerPos")
+                            .data(haveDate.filter(function(k, i) {return i < haveDate.length - 1;}))
+                            .enter()
+                            .append("rect")
+                            .attr("class", "runnerPos")
+                            .attr("width", function(k, i) {
+                                return xYearScale(haveDate[i+1]) - xYearScale(k);
+                            })
+                            .attr("x", function(k) { return xYearScale(k)})
+                            .attr("height", 10)
+                            .on("click", function(k) {
+                                recalcDate(k);
+                                resizeRunner();
+                            });
+
+                    runner = svgYearsLine.append("rect")
+                        .attr("class", "runner")
+                        .attr("height", 10);
+
+                    init();
+
+                    sportLabel = item.append("text")
+                            .attr("class", "typeLabel")
+                            .attr("x", ma.left)
+                            .attr("y", (ma.top * 2.5) - 10 + hm);
+
+                    svgadchart = item.append("g")
+                        .attr("width", w)
+                        .attr("height", ha + 30)
+                        .attr("transform", "translate(" + [ma.left , 2.5 * ma.top + hm] + ")");
+
+                    svgadchart.append("g")
+                        .attr("class", "x axis")
+                        .attr("transform", "translate(" + [0 , ha] + ")")
+                        .call(xAdYsAxis);
+                    var g = svgadchart.append("g")
+                            .attr("transform", "translate(" + [0 , ha + 25] + ")");
+                    g.append("rect")
+                            .attr("height", 10)
+                            .attr("width", 10)
+                            .attr("y", -8)
+                            .attr("class", "topgraphleg");
+                    g.append("text")
+                            .attr("dx", "15px")
+                            .text("medals (athletes)");
+                    g = svgadchart.append("g")
+                            .attr("transform", "translate(" + [0 , ha + 38] + ")");
+                    g.append("rect")
+                            .attr("height", 10)
+                            .attr("width", 10)
+                            .attr("y", -8)
+                            .attr("class", "bottomgraphleg");
+                    g.append("text")
+                            .attr("dx", "15px")
+                            .text("countries");
+
+                    areaC = d3.svg.area()
+                        .interpolate("monotone")
+                        .x(function(k) { return xAdYearScale(k.key); })
+                        .y0(ha)
+                        .y1(function(k) { return yAdScaleC(k.count); });
+                    lineC = d3.svg.line()
+                        .interpolate("monotone")
+                        .x(function(k) { return xAdYearScale(k.key); })
+                        .y(function(k) { return yAdScaleC(k.count); });
+
+                    areaM = d3.svg.area()
+                        .interpolate("monotone")
+                        .x(function(k) { return xAdYearScale(k.key); })
+                        .y0(ha)
+                        .y1(function(k) { return yAdScaleM(k.count); });
+                    lineM = d3.svg.line()
+                        .interpolate("monotone")
+                        .x(function(k) { return xAdYearScale(k.key); })
+                        .y(function(k) { return yAdScaleM(k.count) });
+
+                    svgchart = item.append("g")
+                        .attr("width", w)
+                        .attr("height", hm)
+                        .attr("transform", "translate(" + ma.left + "," + ma.top + ")");
+
+                    svgchart.append("text")
+                        .attr("class", "x label")
+                        .attr("text-anchor", "end")
+                        .attr("x", w)
+                        .attr("y", hm - 6)
+                        .text("medals (athletes)");
+
+                    svgchart.append("text")
+                        .attr("class", "label")
+                        .attr("id", "lyaer")
+                        .attr("text-anchor", "end")
+                        .attr("x", w)
+                        .attr("y", hm - 20)
+                        .style("font-size", "14pt")
+                        .text("1896");
+
+                    svgchart.append("text")
+                        .attr("class", "y label")
+                        .attr("text-anchor", "end")
+                        .attr("y", 6)
+                        .attr("dy", ".75em")
+                        .attr("transform", "rotate(-90)")
+                        .text("countries");
+
+                    x_axis = svgchart.append("g")
+                        .attr("class", "x axis")
+                        .attr("transform", "translate(" + 0 + "," + hm + ")");
+
+                    y_axis = svgchart.append("g")
+                        .attr("class", "y axis");
+
+                    var dotsInit = !dots,
+                        dotsSelect,
+                        curLinked;
+
+                    dots = !dotsInit ? dots : svgchart.selectAll(".dots")
+                            .data(dataset)
+                            .enter()
+                            .append("g")
+                            .attr("class", "dots")
+                            .on("mouseover", function(k) {
+                                k.linked = true;
+
+                                curLinked = this;
+
+                                sportLabel.text(k.key);
+
+                                dotsSelect = dots.filter(function(l) {
+                                    return xScale(x(k)) == xScale(x(l)) && yScale(y(k)) == yScale(y(l)) && k.key != l.key;
+                                });
+
+                                if (curLinked) {
+                                    var item = d3.select(curLinked)
+                                                .transition()
+                                                .duration(150)
+                                                .attr("transform", function(l) { return "scale(2)translate(" + [xScale(x(l)) / 2, yScale(y(l)) / 2] + ")"});
+                                        item.select("text")
+                                                .style("visibility", null);
+                                        item.select("circle")
+                                                .style("fill", function(l) { return d3.rgb(cScale(k.key)).brighter() })
+                                                .style("stroke", "#fff");
+                                }
+
+                                dotsSelect.transition()
+                                        .duration(150)
+                                        .attr("transform", function(l, i) {
+                                            l.linked = true;
+                                            return "scale(2)translate(" +
+                                                    [xScale(x(k)) / 2 + r(k) * 2 * Math.sin(i * Math.PI),
+                                                     yScale(y(k)) / 2 + r(k) * 2 * Math.cos(i * Math.PI)] + ")"
+                                        })
+                                        .selectAll("text")
+                                        .transition()
+                                        .duration(150)
+                                        .style("visibility", null);
+                                dotsSelect.selectAll("circle")
+                                        .transition()
+                                        .duration(150)
+                                        .style("fill", function(l) { return d3.rgb(cScale(l.key)); })
+                                        .style("stroke", "#fff");
+
+                                yAdScaleM.domain(d3.extent(k.M.map(function(l) { return l.count; })));
+                                yAdScaleC.domain(d3.extent(k.C.map(function(l) { return l.count; })));
+
+                                svgadchart.selectAll(".areaPath").remove();
+                                svgadchart.append("path")
+                                        .attr("class", "areaPath")
+                                        .style("fill", d3.rgb(cScale(k.key)).brighter().brighter())
+                                        .attr("d", areaM(k.M));
+                                svgadchart.append("path")
+                                        .attr("class", "areaPath")
+                                        .style("fill", "none")
+                                        .style("stroke", d3.rgb(cScale(k.key)).brighter())
+                                        .attr("d", lineM(k.M));
+                                svgadchart.append("path")
+                                        .attr("class", "areaPath")
+                                        .style("fill", cScale(k.key))
+                                        .style("fill-opacity", .3)
+                                        .attr("d", areaC(k.C));
+                                svgadchart.append("path")
+                                        .attr("class", "areaPath")
+                                        .style("fill", "none")
+                                        .style("stroke", d3.rgb(cScale(k.key)).darker())
+                                        .attr("d", lineC(k.C));
+                                svgadchart.selectAll(".topgraphleg")
+                                        .style("fill", d3.rgb(cScale(k.key)).brighter().brighter())
+                                        .style("stroke", d3.rgb(cScale(k.key)).brighter());
+                                svgadchart.selectAll(".bottomgraphleg")
+                                        .style("fill", cScale(k.key))
+                                        .style("stroke", d3.rgb(cScale(k.key)).darker());
+
+                                dots.sort(function(a, b) {
+                                    return a.linked ? 1 : comp(a, b);
+                                })
+                            })
+                            .on("mouseout", function(k) {
+                                k.linked = false;
+
+                                sportLabel.text(null);
+
+                                if(curLinked) {
+                                    var item = d3.select(curLinked)
+                                            .transition()
+                                            .duration(150)
+                                            .attr("transform", function(l) { return "translate(" + [xScale(x(l)), yScale(y(l))] + ")" })
+                                        item.select("circle")
+                                            .style("fill", cScale(k.key))
+                                            .style("stroke", function(l) { return d3.rgb(cScale(l.key)).darker().darker() });
+                                        item.select("text")
+                                            .style("visibility", "hidden");
+                                }
+
+                                if (dotsSelect) {
+                                    dotsSelect.transition()
+                                            .duration(150)
+                                            .attr("transform", function(l) {
+                                                l.linked = false;
+                                                return "translate(" +  [xScale(x(l)), yScale(y(l))] + ")"
+                                            })
+                                            .selectAll("text")
+                                            .style("visibility", "hidden");
+                                    dotsSelect.selectAll("circle")
+                                            .style("fill", function(l) { return cScale(l.key); })
+                                            .style("stroke", function(l) { return d3.rgb(cScale(l.key)).darker().darker(); });
+                                }
+
+                                svgadchart.selectAll(".areaPath").remove();
+
+                                dots.sort(comp);
+                            });
+                    if (dotsInit) {
+                        dots.append("circle")
+                                .style("fill", function(k) {return cScale(k.key); })
+                                .style("stroke", function(k) {return d3.rgb(cScale(k.key)).darker().darker(); });
+                        dots.append("text")
+                                .style("visibility", "hidden")
+                                .attr("text-anchor", "middle")
+                                .attr("dy", ".35em")
+                                .style("cursor", "default")
+                                .text(function(k) { return k.key });
+                    }
+                    recalcDate(haveDate[curYear[1]]);
+                }
+
+                function init() {
+                    var notInit = !dataset;
+                    dataset = dataset || d3.nest()
+                        .key(function(d) { return d.label.replace(/(^\\s*)|(\\s*$)/g, ""); })
+                        .key(function(d) { return d.date.getFullYear(); })
+                        .entries(graph.nodes
+                            .filter(function(d) { return d.type == 1;})
+                            .sort(function(a, b) { return d3.ascending(a.date, b.date); })
+                            .sort(function(a, b) { return d3.ascending(a.label, b.label); })
+                        );
+
+                    if (notInit) {
+                        dataset.forEach(function(d) {
+                            d.values
+                                    .forEach(function(m, i){
+                                        var item = m.values[0];
+                                        m = {key : m.key};
+
+                                        var ein = graph.edges.filter(function(k) { return k.ti == item.index; });
+
+                                        m.cType3s = ein.filter(function(k) { return k.source().type == 3; }).map(function(k) { return k.source(); });
+                                        m.cType2s = ein.filter(function(k) { return k.source().type == 2; }).map(function(k) { return k.source(); });
+                                        if (m.cType2s.length) {
+                                            m.cType2s.forEach(function(k) {
+                                                m.cType3s = m.cType3s.concat(graph.edges.filter(function(n) {
+                                                    return n.ti == k.index;
+                                                }).map(function(l) {
+                                                    return l.source();
+                                                }));
+                                            })
+                                        }
+                                        m.countries = d3.nest()
+                                                .key(function(k) { return k.country.name; })
+                                                .entries(m.cType3s);
+                                        d.values[i] = m;
+                                        d.values[m.key] = i + 1;
+                                    });
+                            d.M = realDate.map(function(l, i) {
+                                return {key : l, count : x(d, 0, 0, i)};
+                            });
+                            d.C = realDate.map(function(l, i) {
+                                return {key : l, count : y(d, 0, 0, i)};
+                            });
+                        });
+                    }
+                }
+
+                function recalcDate(year) {
+                    curYear[1] = haveDate.indexOf(year);
+                    curYear[1] = curYear[1] < 0 ? 0 : curYear[1];
+                    year = haveDate[curYear[1]];
+
+                    curYear[0] = curYear[1] - 1;
+                    curYear[0] = curYear[0] < 0 ? 0 : curYear[0];
+                    curYear[2] = curYear[1] + 1;
+                    curYear[2] = curYear[2] < haveDate.length ? curYear[2] : haveDate.length - 2;
+
+                    xScale.domain(d3.extent(dataset.map(x)));
+                    yScale.domain(d3.extent(dataset.map(y)));
+                    rScale.domain(d3.extent(dataset.map(r)));
+
+                    x_axis.call(xAxis);
+                    y_axis.call(yAxis);
+
+                    svgchart.selectAll("#lyaer").text(year);
+
+                    runner
+                        .transition()
+                        .duration(150)
+                        .attr("width", xYearScale(haveDate[curYear[2]]) - xYearScale(haveDate[curYear[1]]));
+
+                    dots.call(position)
+                        .sort(comp);
+                }
+
+                return sCTM;
+            }
+
+            var stat_sCTM = sCTM();
 
             function show() {
-                resize();
-                divstat = d3.select("body")
-                        .insert("div", ":first-child")
-                        .style("width", width() - 40 * 2 + "px")
-                        .style("height", height() - 40 * 1.6 + "px")
-                        .attr("id", "statwindow")
-                        .style("top", "40px")
-                        .style("left", "40px");
+                w = width() - 290,
+                h = height() - 290;
+
+                divstat.style("display", "block");
+
+                svgstat
+                    .attr("width", w + ma.left + ma.right)
+                    .attr("height", h + ma.top + ma.bottom);
+
+                svgstat.call(stat_sCTM);
             }
 
             function hide() {
-                d3.select("#statwindow").remove();
+                d3.select("#statcont")
+                    .style("display", "none");
             }
+
+            if (showStatOnLoad)
+                show();
         }
 
         function buttonLabelRoot() {
-            var but = d3.select("body").select("svg").selectAll("#labelRootOffOn")
+            var but = d3.select("body").select("#mainsvg").selectAll("#labelRootOffOn")
                 .data([{check : showLabelOnRoot}])
                 .enter()
                 .append("g")
@@ -1142,7 +1652,7 @@ var init = function() {
                         return colors(d.values.length);
                     })
                     .style("border-color", function(d) {
-                        return d3.rgb(colors(d.values.length)).darker().darker().darker().toString();
+                        return d3.rgb(colors(d.values.length)).darker().darker().darker();
                     })
                     .style("padding-left", function(d) {
                         return d.values.length * paddingCoff + "px";
