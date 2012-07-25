@@ -329,6 +329,63 @@ canvas {
     shape-rendering: crispEdges;
 }
 
+#statwindow text.aLabel {
+    font-size: 14px;
+    text-shadow: #0C506E 1px 1px 1px;
+    shape-rendering: crispEdges;
+}
+
 .areaPath {
     stroke-width: 1.5px;
+}
+
+.gCurPosOnLine {
+    stroke: #666;
+    stroke-width: 0.5px;
+}
+
+.gCurPosOnLine text {
+    text-shadow: none;
+}
+
+.curPosOnLine {
+    stroke: #F23A2B;
+    fill: #F8938B;
+    stroke-width: 1.5px;
+    opacity: .8;
+}
+
+#statwindow .chartCaption {
+    font-weight: bold;
+    font-size: 24px;
+    text-shadow: #f9f9f9 1px 1px 2px;
+    fill: #000;
+}
+
+#statwindow .coListItem text {
+    text-shadow: #0C506E 1px 1px 2px;
+}
+
+#statwindow .coListItem text.name {
+    font-size: 12px;
+    fill: #1A5A76;
+    text-shadow: none;
+}
+
+.coListItem rect.bg {
+    fill: #C1D3DB;
+    fill-opacity: .3;
+    stroke: #1A5A76;
+}
+
+#tooltip {
+    display: none;
+    position: absolute;
+    z-index: 200;
+    top: 0;
+    left: 0;
+}
+
+#tooltip .popup div {
+    display: block;
 }

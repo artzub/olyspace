@@ -119,7 +119,16 @@
             </filter>
             <radialGradient xlink:href="#linearGradient3899" id="radialGradient3982" gradientUnits="userSpaceOnUse" spreadMethod="reflect" cx="83.842659" cy="75.54467" fx="83.842659" fy="75.54467" r="58.831825"/>
         </defs>
+        <defs id="starsZeroGr">
+
+        </defs>
     </svg>
+    <div id="tooltip" class="outer">
+        <div class="popup">
+            <span id="tooltiplabel"></span>
+            <div id="tooltipcontext"></div>
+        </div>
+    </div>
 <script>
 var init = function() {
     var margin = {top:0, right:0, bottom:0, left:0},
@@ -199,6 +208,7 @@ var init = function() {
 
     var svgnode = svg.append("g");
     var svglabel = svg.append("g");
+    var tooltip = d3.select("#tooltip").select("div");
 
     var radius = d3.scale.sqrt()
             .range([0, 4]);
@@ -372,7 +382,6 @@ var init = function() {
                 arr.push(d);
             }
 
-
             d = arr.pop();
             while(d) {
                 graph.edges.
@@ -403,6 +412,26 @@ var init = function() {
                 svgnode.selectAll(".nodelabel").style("visibility", function(b) {
                     return b.index == d.index ? null : d3.select(this).style("visibility")});
                 d = arr.pop();
+            }
+        }
+
+        function showtooltip(d) {
+            var label = tooltip.select("#tooltiplabel");
+            var cont = tooltip.select("#tooltipcontext");
+
+            label.text(d.label);
+
+
+
+            switch (d.type){
+                case 0:
+                    break;
+                case 1:
+                    break;
+                case 2:
+                    break;
+                case 3:
+                    break;
             }
         }
 
@@ -677,36 +706,38 @@ var init = function() {
                             .attr("transform", "translate(-7.0792635e-6,0.86198797)");
                     break;
                 case 2 :
-                    var defs = d3.selectAll("#starsZeroGr");
-                    if (defs)
-                        defs.remove();
-                    defs = svg.append("defs").attr("id", "starsZeroGr");
+                    var defs = d3.select("body").select("svg#mainsvg").selectAll("#starsZeroGr");
+                    if (!defs[0].length)
+                        defs = d3.select("body").select("svg#mainsvg").append("defs").attr("id", "starsZeroGr");
 
                     var makeGrad = function(d, type) {
                         if (!type)
                             type = 0;
 
-                        defs.append("radialGradient")
-                                .attr("xlink:xlink:href", "#lg_st_" + type + "_" + d.index)
-                                .attr("id", "rg_st_" + type + "_" + d.index)
-                                .attr("cx", "398.24252")
-                                .attr("cy", "662.73962")
-                                .attr("fx", "398.24252")
-                                .attr("fy", "662.73962")
-                                .attr("r", type ? "47.601433" : "31.487122")
-                                .attr("gradientTransform", type ? "matrix(1,0,0,1.0336521,0,-22.302595)" : "matrix(1,0,0,1.0302824,0,-20.069346)")
-                                .attr("gradientUnits", "userSpaceOnUse");
+                        if (defs.selectAll("#rg_st_" + type + "_" + d.index).empty())
+                            defs.append("radialGradient")
+                                    .attr("xlink:xlink:href", "#lg_st_" + type + "_" + d.index)
+                                    .attr("id", "rg_st_" + type + "_" + d.index)
+                                    .attr("cx", "398.24252")
+                                    .attr("cy", "662.73962")
+                                    .attr("fx", "398.24252")
+                                    .attr("fy", "662.73962")
+                                    .attr("r", type ? "47.601433" : "31.487122")
+                                    .attr("gradientTransform", type ? "matrix(1,0,0,1.0336521,0,-22.302595)" : "matrix(1,0,0,1.0302824,0,-20.069346)")
+                                    .attr("gradientUnits", "userSpaceOnUse");
 
-                        var lin = defs.append("linearGradient")
-                                .attr("id", "lg_st_" + type + "_" + d.index);
-                        lin.append("stop")
-                                .attr("offset","0")
-                                .attr("style", "stop-color:#deffff;stop-opacity:1;")
-                                .style("stop-color", color(calcColor(d)));
-                        lin.append("stop")
-                                .attr("offset","1")
-                                .attr("style", "stop-color:#deffff;stop-opacity:0;")
-                                .style("stop-color", color(calcColor(d)));
+                        if (defs.selectAll("#lg_st_" + type + "_" + d.index).empty()){
+                            var lin = defs.append("linearGradient")
+                                    .attr("id", "lg_st_" + type + "_" + d.index);
+                                lin.append("stop")
+                                    .attr("offset","0")
+                                    .attr("style", "stop-color:#deffff;stop-opacity:1;")
+                                    .style("stop-color", color(calcColor(d)));
+                                lin.append("stop")
+                                    .attr("offset","1")
+                                    .attr("style", "stop-color:#deffff;stop-opacity:0;")
+                                    .style("stop-color", color(calcColor(d)));
+                        }
 
                         return "url(#rg_st_" + type + "_" + d.index + ")";
                     }
@@ -1046,14 +1077,16 @@ var init = function() {
             // sport countries to medals
             var sCTM = function() {
                 var dataset = false;
+                var dataforyear = false;
                 var curYear = [-1,0,1];
                 var hm = h / 1.8,
                     ha = h / 3;
 
-
-
-                var r = function(k) {
-                            var i = (k.values[haveDate[curYear[1]]] || 0) - 1;
+                var r = function(k, ind, data, i) {
+                            if (arguments.length < 4)
+                                i = (k.values[haveDate[curYear[1]]] || 0) - 1;
+                            else
+                                i = (k.values[haveDate[i]] || 0) - 1;
                             return i >= 0 ? k.values[i].cType2s.length : 0;
                         },
                     x = function(k, ind, data, i) {
@@ -1069,7 +1102,15 @@ var init = function() {
                             else
                                 i = (k.values[haveDate[i]] || 0) - 1;
                             return i >= 0 ? d3.keys(k.values[i].countries).length : 0;
-                        };
+                        },
+                    countries = function(k, ind, data, i) {
+                            if (arguments.length < 4)
+                                i = (k.values[haveDate[curYear[1]]] || 0) - 1;
+                            else
+                                i = (k.values[haveDate[i]] || 0) - 1;
+                            return i >= 0 ? k.values[i].countries : [];
+                        },
+                    c = function(l) { return l.count; };
 
                 var xScale = d3.scale.linear()
                             .range([0, w]),
@@ -1078,11 +1119,15 @@ var init = function() {
                     rScale = d3.scale.sqrt()
                             .range([0, 20]),
                     cScale = d3.scale.category20(),
+                    cCountry = d3.scale.category20(),
+                    cMedals = d3.scale.ordinal()
+                            .domain(["GOLD", "SILVER", "BRONZE"])
+                            .range(["#FCD975", "#CDC5C2", "#cd7f32"]),
                     xYearScale = d3.scale.linear()
                             .domain(d3.extent(haveDate))
                             .range([0, w]),
                     xAdYearScale = d3.scale.linear()
-                            .domain(d3.extent(haveDate))
+                            .domain(d3.extent(realDate))
                             .range([0, w/2]),
                     yAdScaleC = d3.scale.linear()
                             .range([ha, ha / 3]),
@@ -1106,6 +1151,12 @@ var init = function() {
                     return r(b) - r(a);
                 }
 
+                var compCountry = function(a, b) {
+                    return d3.ascending(
+                        d3.sum(b.medals.map(function(l) { return l.count })),
+                        d3.sum(a.medals.map(function(l) { return l.count })));
+                }
+
                 var xAxis = d3.svg.axis().orient("bottom").scale(xScale).ticks(20, d3.format(",d")),
                     yAxis = d3.svg.axis().scale(yScale).orient("left"),
                     xYsAxis = d3.svg.axis().orient("bottom").scale(xYearScale).tickFormat(d3.format("d"))
@@ -1117,7 +1168,13 @@ var init = function() {
                 var svgchart,
                     svgYearsLine,
                     svgadchart,
+                    svgcochart,
+                    svgcolist,
                     sportLabel,
+                    infostat,
+                    mlabel,
+                    clabel,
+                    selabel,
                     x_axis,
                     y_axis,
                     dots,
@@ -1127,297 +1184,552 @@ var init = function() {
                     lineC,
                     lineM;
 
+                var bp = d3.layout.pack()
+                    .size([w / 4 + 50, ha + 30])
+                    .value(function(l) { return l.count; });
+
                 function sCTM() {
                     var item = this;
 
-                    svgYearsLine = item.append("g")
-                        .attr("width", w)
-                        .attr("height", ma.top / 2)
-                        .attr("transform", "translate(" + [ma.left , ma.top + ma.top / 2 + hm] + ")")
-                        .call(d3.behavior.drag().on("drag", function() {
-                            var newX = +runner.attr("x") + d3.event.dx;
-                            if (newX < xYearScale(haveDate[0]))
-                                newX = xYearScale(haveDate[0]);
-                            if (newX > xYearScale(haveDate[haveDate.length - 2]))
-                                newX = xYearScale(haveDate[haveDate.length - 2]);
+                    if (!sCTM.initialized) {
+                        svgYearsLine = item.append("g")
+                                .attr("width", w)
+                                .attr("height", ma.top / 2)
+                            .attr("transform", "translate(" + [ma.left , ma.top + ma.top / 2 + hm] + ")")
+                            .call(d3.behavior.drag().on("drag", function() {
+                                var newX = +runner.attr("x") + d3.event.dx;
+                                if (newX < xYearScale(haveDate[0]))
+                                    newX = xYearScale(haveDate[0]);
+                                if (newX > xYearScale(haveDate[haveDate.length - 2]))
+                                    newX = xYearScale(haveDate[haveDate.length - 2]);
 
-                            var xp = xYearScale(haveDate[curYear[0]]),
-                                xc = xYearScale(haveDate[curYear[1]]),
-                                xn = xYearScale(haveDate[curYear[2]]);
+                                var xp = xYearScale(haveDate[curYear[0]]),
+                                    xc = xYearScale(haveDate[curYear[1]]),
+                                    xn = xYearScale(haveDate[curYear[2]]);
 
-                            var dw = runner.attr("width") / 3,
-                                xwd = +runner.attr("x") + dw;
+                                var dw = runner.attr("width") / 3,
+                                    xwd = +runner.attr("x") + dw;
 
-                            runner
-                                .attr("x", newX);
+                                runner
+                                    .attr("x", newX);
 
-                            if (xwd > xn)
-                                recalcDate(haveDate[curYear[2]]);
-                            else if (xwd < xc)
-                                recalcDate(haveDate[curYear[0]]);
-                        })
-                        .on("dragend", function() {
-                            resizeRunner();
-                        }));
-                    svgYearsLine.append("g")
-                        .attr("class", "x axis")
-                        .attr("transform", "translate(" + [0, 10] + ")")
-                        .call(xYsAxis);
-
-                    function resizeRunner() {
-                        runner
-                            .transition()
-                            .duration(150)
-                            .attr("x", xYearScale(haveDate[curYear[1]]))
-                            .attr("width", xYearScale(haveDate[curYear[2]]) - xYearScale(haveDate[curYear[1]]))
-                    }
-
-                    svgYearsLine.selectAll(".runnerPos")
-                            .data(haveDate.filter(function(k, i) {return i < haveDate.length - 1;}))
-                            .enter()
-                            .append("rect")
-                            .attr("class", "runnerPos")
-                            .attr("width", function(k, i) {
-                                return xYearScale(haveDate[i+1]) - xYearScale(k);
+                                if (xwd > xn)
+                                    recalcDate(haveDate[curYear[2]]);
+                                else if (xwd < xc)
+                                    recalcDate(haveDate[curYear[0]]);
                             })
-                            .attr("x", function(k) { return xYearScale(k)})
-                            .attr("height", 10)
-                            .on("click", function(k) {
-                                recalcDate(k);
+                            .on("dragend", function() {
                                 resizeRunner();
-                            });
+                            }));
+                        svgYearsLine.append("g")
+                            .attr("class", "x axis")
+                            .attr("transform", "translate(" + [0, 10] + ")")
+                            .call(xYsAxis);
 
-                    runner = svgYearsLine.append("rect")
-                        .attr("class", "runner")
-                        .attr("height", 10);
+                        function resizeRunner() {
+                            runner
+                                .transition()
+                                .duration(150)
+                                .attr("x", xYearScale(haveDate[curYear[1]]))
+                                .attr("width", xYearScale(haveDate[curYear[2]]) - xYearScale(haveDate[curYear[1]]))
+                        }
 
-                    init();
-
-                    sportLabel = item.append("text")
-                            .attr("class", "typeLabel")
-                            .attr("x", ma.left)
-                            .attr("y", (ma.top * 2.5) - 10 + hm);
-
-                    svgadchart = item.append("g")
-                        .attr("width", w)
-                        .attr("height", ha + 30)
-                        .attr("transform", "translate(" + [ma.left , 2.5 * ma.top + hm] + ")");
-
-                    svgadchart.append("g")
-                        .attr("class", "x axis")
-                        .attr("transform", "translate(" + [0 , ha] + ")")
-                        .call(xAdYsAxis);
-                    var g = svgadchart.append("g")
-                            .attr("transform", "translate(" + [0 , ha + 25] + ")");
-                    g.append("rect")
-                            .attr("height", 10)
-                            .attr("width", 10)
-                            .attr("y", -8)
-                            .attr("class", "topgraphleg");
-                    g.append("text")
-                            .attr("dx", "15px")
-                            .text("medals (athletes)");
-                    g = svgadchart.append("g")
-                            .attr("transform", "translate(" + [0 , ha + 38] + ")");
-                    g.append("rect")
-                            .attr("height", 10)
-                            .attr("width", 10)
-                            .attr("y", -8)
-                            .attr("class", "bottomgraphleg");
-                    g.append("text")
-                            .attr("dx", "15px")
-                            .text("countries");
-
-                    areaC = d3.svg.area()
-                        .interpolate("monotone")
-                        .x(function(k) { return xAdYearScale(k.key); })
-                        .y0(ha)
-                        .y1(function(k) { return yAdScaleC(k.count); });
-                    lineC = d3.svg.line()
-                        .interpolate("monotone")
-                        .x(function(k) { return xAdYearScale(k.key); })
-                        .y(function(k) { return yAdScaleC(k.count); });
-
-                    areaM = d3.svg.area()
-                        .interpolate("monotone")
-                        .x(function(k) { return xAdYearScale(k.key); })
-                        .y0(ha)
-                        .y1(function(k) { return yAdScaleM(k.count); });
-                    lineM = d3.svg.line()
-                        .interpolate("monotone")
-                        .x(function(k) { return xAdYearScale(k.key); })
-                        .y(function(k) { return yAdScaleM(k.count) });
-
-                    svgchart = item.append("g")
-                        .attr("width", w)
-                        .attr("height", hm)
-                        .attr("transform", "translate(" + ma.left + "," + ma.top + ")");
-
-                    svgchart.append("text")
-                        .attr("class", "x label")
-                        .attr("text-anchor", "end")
-                        .attr("x", w)
-                        .attr("y", hm - 6)
-                        .text("medals (athletes)");
-
-                    svgchart.append("text")
-                        .attr("class", "label")
-                        .attr("id", "lyaer")
-                        .attr("text-anchor", "end")
-                        .attr("x", w)
-                        .attr("y", hm - 20)
-                        .style("font-size", "14pt")
-                        .text("1896");
-
-                    svgchart.append("text")
-                        .attr("class", "y label")
-                        .attr("text-anchor", "end")
-                        .attr("y", 6)
-                        .attr("dy", ".75em")
-                        .attr("transform", "rotate(-90)")
-                        .text("countries");
-
-                    x_axis = svgchart.append("g")
-                        .attr("class", "x axis")
-                        .attr("transform", "translate(" + 0 + "," + hm + ")");
-
-                    y_axis = svgchart.append("g")
-                        .attr("class", "y axis");
-
-                    var dotsInit = !dots,
-                        dotsSelect,
-                        curLinked;
-
-                    dots = !dotsInit ? dots : svgchart.selectAll(".dots")
-                            .data(dataset)
-                            .enter()
-                            .append("g")
-                            .attr("class", "dots")
-                            .on("mouseover", function(k) {
-                                k.linked = true;
-
-                                curLinked = this;
-
-                                sportLabel.text(k.key);
-
-                                dotsSelect = dots.filter(function(l) {
-                                    return xScale(x(k)) == xScale(x(l)) && yScale(y(k)) == yScale(y(l)) && k.key != l.key;
+                        svgYearsLine.selectAll(".runnerPos")
+                                .data(haveDate.filter(function(k, i) {return i < haveDate.length - 1;}))
+                                .enter()
+                                .append("rect")
+                                .attr("class", "runnerPos")
+                                .attr("width", function(k, i) {
+                                    return xYearScale(haveDate[i+1]) - xYearScale(k);
+                                })
+                                .attr("x", function(k) { return xYearScale(k)})
+                                .attr("height", 10)
+                                .on("click", function(k) {
+                                    recalcDate(k);
+                                    resizeRunner();
                                 });
 
-                                if (curLinked) {
-                                    var item = d3.select(curLinked)
-                                                .transition()
-                                                .duration(150)
-                                                .attr("transform", function(l) { return "scale(2)translate(" + [xScale(x(l)) / 2, yScale(y(l)) / 2] + ")"});
-                                        item.select("text")
-                                                .style("visibility", null);
-                                        item.select("circle")
-                                                .style("fill", function(l) { return d3.rgb(cScale(k.key)).brighter() })
-                                                .style("stroke", "#fff");
-                                }
+                        runner = svgYearsLine.append("rect")
+                            .attr("class", "runner")
+                            .attr("height", 10);
 
+                        init();
+
+                        infostat = item.append("g")
+                                .attr("width", w / 2)
+                                .attr("height", ha + 30)
+                                .attr("transform", "translate(" + [ma.left + w / 2, 2.5 * ma.top + hm] + ")");
+
+                        sportLabel = infostat.append("text")
+                                .attr("class", "typeLabel")
+                                .attr("x", ma.left - 30)
+                                .attr("y", ma.top - 30);
+
+                        mlabel = infostat.append("text")
+                                .attr("class", "aLabel")
+                                .attr("x", ma.left - 15)
+                                .attr("y", ma.top - 10)
+                                .text("medals (athletes)");
+
+                        clabel = infostat.append("text")
+                                .attr("class", "aLabel")
+                                .attr("x", ma.left - 15)
+                                .attr("y", ma.top + 3)
+                                .text("countries");
+
+                        selabel = infostat.append("text")
+                                .attr("class", "aLabel")
+                                .attr("x", ma.left - 15)
+                                .attr("y", ma.top + 16)
+                                .text("sports events");
+
+                        svgcochart = infostat.append("g")
+                                .attr("width", w / 4 + 50)
+                                .attr("height", ha + 30)
+                                .attr("transform", "translate(" + [w / 4, 0] + ")");
+
+                        svgcolist = infostat.append("g")
+                                .attr("width", w / 4)
+                                .attr("height", ha - (ma.top + 2))
+                                .attr("transform", "translate(" + [ma.left - 15 / 4, ma.top + 38] + ")");
+
+                        svgadchart = item.append("g")
+                            .attr("width", w / 2)
+                            .attr("height", ha + 30)
+                            .attr("transform", "translate(" + [ma.left , 2.5 * ma.top + hm] + ")");
+
+                        svgadchart.append("g")
+                            .attr("class", "x axis")
+                            .attr("transform", "translate(" + [0 , ha] + ")")
+                            .call(xAdYsAxis);
+
+                        var g = svgadchart.append("g")
+                                .attr("transform", "translate(" + [0 , ha + 25] + ")");
+                        g.append("rect")
+                                .attr("height", 10)
+                                .attr("width", 10)
+                                .attr("y", -8)
+                                .attr("class", "topgraphleg");
+                        g.append("text")
+                                .attr("dx", "15px")
+                                .text("medals (athletes)");
+                        g = svgadchart.append("g")
+                                .attr("transform", "translate(" + [0 , ha + 38] + ")");
+                        g.append("rect")
+                                .attr("height", 10)
+                                .attr("width", 10)
+                                .attr("y", -8)
+                                .attr("class", "bottomgraphleg");
+                        g.append("text")
+                                .attr("dx", "15px")
+                                .text("countries");
+
+                        areaC = d3.svg.area()
+                            .interpolate("monotone")
+                            .x(function(k) { return xAdYearScale(k.key); })
+                            .y0(ha)
+                            .y1(function(k) { return yAdScaleC(k.count); });
+                        lineC = d3.svg.line()
+                            .interpolate("monotone")
+                            .x(function(k) { return xAdYearScale(k.key); })
+                            .y(function(k) { return yAdScaleC(k.count); });
+
+                        areaM = d3.svg.area()
+                            .interpolate("monotone")
+                            .x(function(k) { return xAdYearScale(k.key); })
+                            .y0(ha)
+                            .y1(function(k) { return yAdScaleM(k.count); });
+                        lineM = d3.svg.line()
+                            .interpolate("monotone")
+                            .x(function(k) { return xAdYearScale(k.key); })
+                            .y(function(k) { return yAdScaleM(k.count) });
+
+                        svgchart = item.append("g")
+                            .attr("width", w)
+                            .attr("height", hm)
+                            .attr("transform", "translate(" + ma.left + "," + ma.top + ")");
+
+                        svgchart.append("text")
+                            .attr("class", "x label")
+                            .attr("text-anchor", "end")
+                            .attr("x", w)
+                            .attr("y", hm - 6)
+                            .text("medals (athletes)");
+
+                        svgchart.append("text")
+                            .attr("class", "label")
+                            .attr("id", "lyaer")
+                            .attr("text-anchor", "end")
+                            .attr("x", w)
+                            .attr("y", hm - 20)
+                            .style("font-size", "14pt")
+                            .text("1896");
+
+                        svgchart.append("text")
+                            .attr("class", "y label")
+                            .attr("text-anchor", "end")
+                            .attr("y", 6)
+                            .attr("dy", ".75em")
+                            .attr("transform", "rotate(-90)")
+                            .text("countries");
+
+                        x_axis = svgchart.append("g")
+                            .attr("class", "x axis")
+                            .attr("transform", "translate(" + 0 + "," + hm + ")");
+
+                        y_axis = svgchart.append("g")
+                            .attr("class", "y axis");
+
+                        sCTM.mout = function(k) {
+                            var year = haveDate[curYear[1]],
+                                dyear = dataforyear[year + "y"];
+
+                            sportLabel.text(year);
+                            mlabel.text(mlabel.text().split(":")[0] + ": " + dataforyear.M[dyear.Mi].count);
+                            clabel.text(clabel.text().split(":")[0] + ": " + dataforyear.C[dyear.Ci].count);
+                            selabel.text(selabel.text().split(":")[0] + ": " + dataforyear.S[dyear.Si].count);
+
+                            if(curLinked) {
+                                var item = d3.select(curLinked)
+                                        .transition()
+                                        .duration(150)
+                                        .attr("transform", function(l) {
+                                            l.linked = false;
+                                            return "translate(" + [xScale(x(l)), yScale(y(l))] + ")"
+                                        })
+                                    item.select("circle")
+                                        .style("fill", function(l) { return cScale(l.key) })
+                                        .style("stroke", function(l) { return d3.rgb(cScale(l.key)).darker().darker() });
+                                    item.select("text")
+                                        .style("visibility", "hidden");
+                                curLinked = false;
+                            }
+
+                            if (dotsSelect) {
                                 dotsSelect.transition()
                                         .duration(150)
-                                        .attr("transform", function(l, i) {
-                                            l.linked = true;
-                                            return "scale(2)translate(" +
-                                                    [xScale(x(k)) / 2 + r(k) * 2 * Math.sin(i * Math.PI),
-                                                     yScale(y(k)) / 2 + r(k) * 2 * Math.cos(i * Math.PI)] + ")"
+                                        .attr("transform", function(l) {
+                                            l.linked = false;
+                                            return "translate(" +  [xScale(x(l)), yScale(y(l))] + ")"
                                         })
                                         .selectAll("text")
-                                        .transition()
-                                        .duration(150)
-                                        .style("visibility", null);
+                                        .style("visibility", "hidden");
                                 dotsSelect.selectAll("circle")
-                                        .transition()
-                                        .duration(150)
-                                        .style("fill", function(l) { return d3.rgb(cScale(l.key)); })
-                                        .style("stroke", "#fff");
+                                        .style("fill", function(l) { return cScale(l.key); })
+                                        .style("stroke", function(l) { return d3.rgb(cScale(l.key)).darker().darker(); });
+                            }
+                            dots.sort(comp);
 
-                                yAdScaleM.domain(d3.extent(k.M.map(function(l) { return l.count; })));
-                                yAdScaleC.domain(d3.extent(k.C.map(function(l) { return l.count; })));
+                            makeArea(dataforyear.M, dataforyear.C, year,
+                                    dataforyear.M[dyear.Mi].count,
+                                    dataforyear.C[dyear.Ci].count,
+                                    "#59C0ED", "#18A4E3", "#FFA560", "#FF7E1B", .8);
+                            countriesRate(dataforyear[year + "y"].countries);
+                        }
 
-                                svgadchart.selectAll(".areaPath").remove();
-                                svgadchart.append("path")
-                                        .attr("class", "areaPath")
-                                        .style("fill", d3.rgb(cScale(k.key)).brighter().brighter())
-                                        .attr("d", areaM(k.M));
-                                svgadchart.append("path")
-                                        .attr("class", "areaPath")
-                                        .style("fill", "none")
-                                        .style("stroke", d3.rgb(cScale(k.key)).brighter())
-                                        .attr("d", lineM(k.M));
-                                svgadchart.append("path")
-                                        .attr("class", "areaPath")
-                                        .style("fill", cScale(k.key))
-                                        .style("fill-opacity", .3)
-                                        .attr("d", areaC(k.C));
-                                svgadchart.append("path")
-                                        .attr("class", "areaPath")
-                                        .style("fill", "none")
-                                        .style("stroke", d3.rgb(cScale(k.key)).darker())
-                                        .attr("d", lineC(k.C));
-                                svgadchart.selectAll(".topgraphleg")
-                                        .style("fill", d3.rgb(cScale(k.key)).brighter().brighter())
-                                        .style("stroke", d3.rgb(cScale(k.key)).brighter());
-                                svgadchart.selectAll(".bottomgraphleg")
-                                        .style("fill", cScale(k.key))
-                                        .style("stroke", d3.rgb(cScale(k.key)).darker());
+                        function makeArea(M, C, year, ym, yc, cMa, cMl, cCa, cCl, op) {
+                            svgadchart.selectAll(".areaPath").remove();
+                            svgadchart.selectAll(".topgraphleg, .bottomgraphleg")
+                                    .style("fill", "none")
+                                    .style("stroke", "none");
 
-                                dots.sort(function(a, b) {
-                                    return a.linked ? 1 : comp(a, b);
-                                })
-                            })
-                            .on("mouseout", function(k) {
-                                k.linked = false;
+                            yAdScaleM.domain(d3.extent(M.map(c)));
+                            yAdScaleC.domain(d3.extent(C.map(c)));
 
-                                sportLabel.text(null);
+                            svgadchart.selectAll(".areaPath").remove();
+                            svgadchart.append("path")
+                                    .attr("class", "areaPath")
+                                    .style("fill", cMa)
+                                    .attr("d", areaM(M));
+                            svgadchart.append("path")
+                                    .attr("class", "areaPath")
+                                    .style("fill", "none")
+                                    .style("stroke", cMl)
+                                    .attr("d", lineM(M));
+                            svgadchart.append("path")
+                                    .attr("class", "areaPath")
+                                    .style("fill", cCa)
+                                    .style("fill-opacity", op)
+                                    .attr("d", areaC(C));
+                            svgadchart.append("path")
+                                    .attr("class", "areaPath")
+                                    .style("fill", "none")
+                                    .style("stroke", cCl)
+                                    .attr("d", lineC(C));
+                            svgadchart.selectAll(".topgraphleg")
+                                    .style("fill", cMa)
+                                    .style("stroke", cMl);
+                            svgadchart.selectAll(".bottomgraphleg")
+                                    .style("fill", cCa)
+                                    .style("stroke", cCl);
 
-                                if(curLinked) {
-                                    var item = d3.select(curLinked)
+                            svgadchart.selectAll(".gCurPosOnLine").remove();
+                            var g = svgadchart.append("g")
+                                    .attr("class", "gCurPosOnLine")
+                                    .attr("transform", "translate(" + [xAdYearScale(year), 0] + ")")
+                                    .attr("height", ha);
+                            g.append("path")
+                                    .attr("d", "M 0, " + d3.max([yAdScaleM(ym), yAdScaleC(yc)]) + " L 0, " + ha);
+                            g.append("circle")
+                                    .attr("class", "curPosOnLine")
+                                    .attr("cy", yAdScaleM(ym))
+                                    .attr("r", 5);
+                            g.append("circle")
+                                    .attr("class", "curPosOnLine")
+                                    .attr("cy", yAdScaleC(yc))
+                                    .attr("r", 5);
+                            g.append("text")
+                                    .attr("text-anchor", "end")
+                                    .attr("x", ha)
+                                    .attr("transform", "rotate(90)")
+                                    .text(year);
+                        }
+
+                        function countriesRate(ck) {
+                            svgcochart.selectAll("g.coStats").remove();
+                            var bubbles = svgcochart.data([
+                                {
+                                    key:"countries",
+                                    type:0,
+                                    children:ck.map(function (l) {
+                                        return {key:l.key, type:1,
+                                            children:l.medals
+                                        };
+                                    })
+                                }
+                            ])
+                                    .selectAll("g.coStats")
+                                    .data(bp.nodes)
+                                    .enter()
+                                    .append("g")
+                                    .attr("class", "coStats")
+                                    .attr("transform", function (l) {
+                                        return "translate(" + l.x + "," + l.y + ")";
+                                    });
+
+                            bubbles.append("title")
+                                    .text(function (l) {
+                                        return l.key + (l.children ? "" : ": " + l.count);
+                                    });
+
+                            bubbles.append("circle")
+                                    .style("fill", function (l) {
+                                        return l.type ? l.type == 1 ? cCountry(l.key) : cMedals(l.key) : "none"
+                                    })
+                                    .transition()
+                                    .duration(150)
+                                    .attr("r", function (l) {
+                                        return l.r + (l.type == 1 && l.children && l.children.length == 1 ? l.r * 0.05 : 0);
+                                    });
+
+                            bubbles.filter(function (l) {
+                                return !l.children && l.r > 8;
+                            }).append("text")
+                                    .attr("text-anchor", "middle")
+                                    .attr("dy", ".3em")
+                                    .text(function (l) {
+                                        return l.count;
+                                    })
+
+                            svgcolist.selectAll(".coListItem").remove();
+                            var table = svgcolist.selectAll(".coListItem").data(ck.filter(function (l, i) {
+                                return i < 10;
+                            }))
+                                    .enter()
+                                    .append("g")
+                                    .attr("class", "coListItem")
+                                    .attr("transform", function (l, i) {
+                                        return "translate(0, " + i * 16 + ")";
+                                    });
+                            table.append("rect")
+                                    .attr("width", 10)
+                                    .attr("height", 10)
+                                    .attr("x", -10)
+                                    .attr("y", -9.5)
+                                    .attr("fill", function (l) {
+                                        return cCountry(l.key);
+                                    })
+                            table.append("text")
+                                    .attr("class", "name")
+                                    .attr("x", 5)
+                                    .text(function (l) {
+                                        return l.key
+                                    });
+
+                            var wg = +svgcolist.attr("width") - 20;
+                            table.append("text")
+                                    .attr("x", wg - 30)
+                                    .attr("y", -1)
+                                    .attr("fill", cMedals("BRONZE"))
+                                    .text(function (l) {
+                                        var m = l.medals.filter(function (m) {
+                                            return m.key == "BRONZE"
+                                        });
+                                        return m.length > 0 ? m[0].count : 0;
+                                    });
+                            table.append("text")
+                                    .attr("x", wg - 50)
+                                    .attr("y", -1)
+                                    .attr("fill", cMedals("SILVER"))
+                                    .text(function (l) {
+                                        var m = l.medals.filter(function (m) {
+                                            return m.key == "SILVER"
+                                        });
+                                        return m.length > 0 ? m[0].count : 0;
+                                    });
+                            table.append("text")
+                                    .attr("x", wg - 70)
+                                    .attr("y", -1)
+                                    .attr("fill", cMedals("GOLD"))
+                                    .text(function (l) {
+                                        var m = l.medals.filter(function (m) {
+                                            return m.key == "GOLD"
+                                        });
+                                        return m.length > 0 ? m[0].count : 0;
+                                    });
+                            table.insert("rect", ":first-child")
+                                    .attr("x", -12)
+                                    .attr("y", -11)
+                                    .attr("class", "bg")
+                                    .attr("width", wg)
+                                    .attr("height", 13);
+                        }
+
+                        function mover(k) {
+
+                            var year = haveDate[curYear[1]],
+                                dyear = {
+                                    Mi : k.M.map(function(l, i) { return {key : l.key, ind : i} })
+                                            .filter(function(l) { return l.key == year })[0].ind,
+                                    Ci : k.C.map(function(l, i) { return {key : l.key, ind : i} })
+                                            .filter(function(l) { return l.key == year })[0].ind
+                                };
+                            k.linked = true;
+
+                            curLinked = this;
+
+                            sportLabel.text(k.key);
+
+                            mlabel.text(mlabel.text().split(":")[0] + ": " + x(k));
+                            clabel.text(clabel.text().split(":")[0] + ": " + y(k));
+                            selabel.text(selabel.text().split(":")[0] + ": " + r(k));
+
+                            dotsSelect = dots.filter(function(l) {
+                                return xScale(x(k)) == xScale(x(l)) && yScale(y(k)) == yScale(y(l)) && k.key != l.key;
+                            });
+
+                            if (curLinked) {
+                                var item = d3.select(curLinked)
                                             .transition()
                                             .duration(150)
-                                            .attr("transform", function(l) { return "translate(" + [xScale(x(l)), yScale(y(l))] + ")" })
-                                        item.select("circle")
-                                            .style("fill", cScale(k.key))
-                                            .style("stroke", function(l) { return d3.rgb(cScale(l.key)).darker().darker() });
-                                        item.select("text")
-                                            .style("visibility", "hidden");
-                                }
-
-                                if (dotsSelect) {
-                                    dotsSelect.transition()
+                                            .attr("transform", function(l) { return "scale(2)translate(" + [xScale(x(l)) / 2, yScale(y(l)) / 2] + ")"});
+                                    item.select("title").text(function(l) { return "sports events: " + r(l); })
+                                    item.select("text")
+                                            .style("visibility", null);
+                                    item.select("circle")
+                                            .transition()
                                             .duration(150)
-                                            .attr("transform", function(l) {
-                                                l.linked = false;
-                                                return "translate(" +  [xScale(x(l)), yScale(y(l))] + ")"
-                                            })
-                                            .selectAll("text")
-                                            .style("visibility", "hidden");
-                                    dotsSelect.selectAll("circle")
-                                            .style("fill", function(l) { return cScale(l.key); })
-                                            .style("stroke", function(l) { return d3.rgb(cScale(l.key)).darker().darker(); });
-                                }
+                                            .style("fill", function(l) { return d3.rgb(cScale(k.key)).brighter() })
+                                            .style("stroke", "#fff");
 
-                                svgadchart.selectAll(".areaPath").remove();
+                            }
 
-                                dots.sort(comp);
+                            dotsSelect.transition()
+                                    .duration(150)
+                                    .attr("transform", function(l, i) {
+                                        l.linked = true;
+                                        return "scale(2)translate(" +
+                                                [xScale(x(k)) / 2 + r(k) * 2 * Math.sin(i * Math.PI),
+                                                 yScale(y(k)) / 2 + r(k) * 2 * Math.cos(i * Math.PI)] + ")"
+                                    })
+                                    .selectAll("text")
+                                    .transition()
+                                    .duration(150)
+                                    .style("visibility", null);
+                            dotsSelect.selectAll("circle")
+                                    .transition()
+                                    .duration(150)
+                                    .style("fill", function(l) { return d3.rgb(cScale(l.key)); })
+                                    .style("stroke", "#fff");
+
+                            dots.sort(function(a, b) {
+                                return a.linked ? 1 : comp(a, b);
                             });
-                    if (dotsInit) {
-                        dots.append("circle")
-                                .style("fill", function(k) {return cScale(k.key); })
-                                .style("stroke", function(k) {return d3.rgb(cScale(k.key)).darker().darker(); });
-                        dots.append("text")
-                                .style("visibility", "hidden")
-                                .attr("text-anchor", "middle")
-                                .attr("dy", ".35em")
-                                .style("cursor", "default")
-                                .text(function(k) { return k.key });
+
+                            makeArea(k.M, k.C, year,
+                                    k.M[dyear.Mi].count,
+                                    k.C[dyear.Ci].count,
+                                    d3.rgb(cScale(k.key)).brighter().brighter(),
+                                    d3.rgb(cScale(k.key)).brighter(),
+                                    cScale(k.key),
+                                    d3.rgb(cScale(k.key)).darker(), .3)
+
+                            countriesRate(countries(k));
+                        }
+
+                        var dotsInit = !dots,
+                            dotsSelect,
+                            curLinked;
+
+                        dots = !dotsInit ? dots : svgchart.selectAll(".dots")
+                                .data(dataset)
+                                .enter()
+                                .append("g")
+                                .attr("class", "dots")
+                                .on("mouseover", mover)
+                                .on("mouseout", sCTM.mout);
+                        if (dotsInit) {
+                            dots.append("title")
+                                    .text(function(k) {
+                                        return "sports events: " + r(k);
+                                    });
+                            dots.append("circle")
+                                    .style("fill", function(k) {return cScale(k.key); })
+                                    .style("stroke", function(k) {return d3.rgb(cScale(k.key)).darker().darker(); });
+                            dots.append("text")
+                                    .style("visibility", "hidden")
+                                    .attr("text-anchor", "middle")
+                                    .attr("dy", ".35em")
+                                    .attr("pointer-events", "none")
+                                    .style("cursor", "default")
+                                    .text(function(k) { return k.key });
+                        }
+
+                        item.append("text")
+                                .text("Sports")
+                                .attr("y", 20)
+                                .attr("class", "chartCaption");
                     }
+
                     recalcDate(haveDate[curYear[1]]);
+                    sCTM.initialized = true;
                 }
 
                 function init() {
+                    function childs(l) {
+                        var medals = {};
+                        l.values.forEach(function(m) {
+                            d3.nest()
+                                .key(function(j) {
+                                        return j.label;
+                                    })
+                                .entries(
+                                    graph.edges.filter(function(n) {
+                                        return n.si == m.index;
+                                }))
+                                .forEach(function(j) {
+                                    if (!medals[j.key])
+                                        medals[j.key] = 0;
+                                    return medals[j.key] += j.values.length;
+                                });
+                        });
+
+                        return d3.keys(medals).map(function(m) {
+                            return {key: m, type: 2, count: medals[m]};
+                        });
+                    }
+
+
                     var notInit = !dataset;
                     dataset = dataset || d3.nest()
                         .key(function(d) { return d.label.replace(/(^\\s*)|(\\s*$)/g, ""); })
@@ -1429,6 +1741,7 @@ var init = function() {
                         );
 
                     if (notInit) {
+                        dataforyear = {M : [], C : [], S : []};
                         dataset.forEach(function(d) {
                             d.values
                                     .forEach(function(m, i){
@@ -1451,11 +1764,56 @@ var init = function() {
                                         m.countries = d3.nest()
                                                 .key(function(k) { return k.country.name; })
                                                 .entries(m.cType3s);
+                                        m.countries.forEach(function(k) {
+                                            k.medals = childs(k);
+                                        });
+                                        m.countries.sort(compCountry);
                                         d.values[i] = m;
                                         d.values[m.key] = i + 1;
                                     });
                             d.M = realDate.map(function(l, i) {
-                                return {key : l, count : x(d, 0, 0, i)};
+                                var o = {key : l, count : x(d, 0, 0, i)};
+                                if (!dataforyear[l + "y"]) {
+                                    dataforyear[l + "y"] = {
+                                        Mi : dataforyear.M.length,
+                                        Ci : dataforyear.C.length,
+                                        Si : dataforyear.S.length,
+                                        countries : []
+                                    };
+                                    dataforyear.M.push({key : l, count: 0});
+                                    dataforyear.C.push({key : l, count: 0});
+                                    dataforyear.S.push({key : l, count: 0});
+                                }
+                                dataforyear.M[dataforyear[l + "y"].Mi].count += o.count;
+                                dataforyear.S[dataforyear[l + "y"].Si].count += r(d, 0, 0, i);
+                                dataforyear.C[dataforyear[l + "y"].Ci].count += y(d, 0, 0, i);
+                                var ck = countries(d, 0, 0, i);
+                                if (!dataforyear[l + "y"].countries.length)
+                                    dataforyear[l + "y"].countries = ck.slice(0);
+                                else
+                                    ck.forEach(function(y) {
+                                        var find = false;
+                                        dataforyear[l + "y"].countries.forEach(function(j) {
+                                            var findmed = false;
+                                            if (j.key == y.key) {
+                                                y.medals.forEach(function(m) {
+                                                    j.medals.forEach(function(n) {
+                                                        if (m.key == n.key) {
+                                                            n.count += m.count;
+                                                            findmed = true;
+                                                        }
+                                                    });
+                                                    if (!findmed)
+                                                        j.medals.push(m);
+                                                });
+                                                find = true;
+                                            }
+                                        });
+                                        if (!find)
+                                            dataforyear[l + "y"].countries.push(y);
+                                    });
+                                dataforyear[l + "y"].countries.sort(compCountry);
+                                return o;
                             });
                             d.C = realDate.map(function(l, i) {
                                 return {key : l, count : y(d, 0, 0, i)};
@@ -1490,6 +1848,7 @@ var init = function() {
 
                     dots.call(position)
                         .sort(comp);
+                    sCTM.mout(null);
                 }
 
                 return sCTM;
