@@ -216,7 +216,8 @@ canvas {
     white-space: nowrap;
 }
 
-.filtercont ul > li a:hover {
+.filtercont ul > li a:hover,
+.filtercont ul > li a.clicked {
     border: 0;
     background-color: rgba(0, 0, 0, .5);
 }
@@ -404,6 +405,7 @@ canvas {
 
 #tooltip .popup div {
     display: block;
+    overflow: hidden;
 }
 
 #tooltip h1 {
