@@ -31,7 +31,7 @@
 
       </style>
     <![endif]-->
-    <script type="text/javascript" src="main.js?0"></script>
+    <script type="text/javascript" src="main.js"></script>
 
     <script type="text/javascript">
 
@@ -52,6 +52,80 @@
 <body onload="init()">
     <div id="statcont" class="outer" style="display: none">
         <div id="statwindow" class="popup">
+            <svg>
+                <defs id="sportAndYear" xmlns="http://www.w3.org/2000/svg">
+                    <pattern id='sarchery' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='sports/archery.png' x='0' y='0' width='56' height='56' /></pattern>
+                    <pattern id='sart_contests' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='sports/art_contests.png' x='0' y='0' width='56' height='56' /></pattern>
+                    <pattern id='sathletics' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='sports/athletics.png' x='0' y='0' width='56' height='56' /></pattern>
+                    <pattern id='sbaseball' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='sports/baseball.png' x='0' y='0' width='56' height='56' /></pattern>
+                    <pattern id='sboxing' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='sports/boxing.png' x='0' y='0' width='56' height='56' /></pattern>
+                    <pattern id='scanoeing' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='sports/canoeing.png' x='0' y='0' width='56' height='56' /></pattern>
+                    <pattern id='scricket' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='sports/cricket.png' x='0' y='0' width='56' height='56' /></pattern>
+                    <pattern id='scroquet' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='sports/croquet.png' x='0' y='0' width='56' height='56' /></pattern>
+                    <pattern id='sdiving' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='sports/diving.png' x='0' y='0' width='56' height='56' /></pattern>
+                    <pattern id='sfencing' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='sports/fencing.png' x='0' y='0' width='56' height='56' /></pattern>
+                    <pattern id='sfield_hockey' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='sports/field_hockey.png' x='0' y='0' width='56' height='56' /></pattern>
+                    <pattern id='sfigure_skating' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='sports/figure_skating.png' x='0' y='0' width='56' height='56' /></pattern>
+                    <pattern id='sfootball' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='sports/football.png' x='0' y='0' width='56' height='56' /></pattern>
+                    <pattern id='sgolf' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='sports/golf.png' x='0' y='0' width='56' height='56' /></pattern>
+                    <pattern id='sgymnastics' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='sports/gymnastics.png' x='0' y='0' width='56' height='56' /></pattern>
+                    <pattern id='shandball' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='sports/handball.png' x='0' y='0' width='56' height='56' /></pattern>
+                    <pattern id='sjeu_de_paume' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='sports/jeu_de_paume.png' x='0' y='0' width='56' height='56' /></pattern>
+                    <pattern id='sjudo' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='sports/judo.png' x='0' y='0' width='56' height='56' /></pattern>
+                    <pattern id='smodern_pentathlon' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='sports/modern_pentathlon.png' x='0' y='0' width='56' height='56' /></pattern>
+                    <pattern id='smotor_boating' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='sports/motor_boating.png' x='0' y='0' width='56' height='56' /></pattern>
+                    <pattern id='spelota_basque' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='sports/pelota_basque.png' x='0' y='0' width='56' height='56' /></pattern>
+                    <pattern id='spolo' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='sports/polo.png' x='0' y='0' width='56' height='56' /></pattern>
+                    <pattern id='srackets' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='sports/rackets.png' x='0' y='0' width='56' height='56' /></pattern>
+                    <pattern id='srowing' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='sports/rowing.png' x='0' y='0' width='56' height='56' /></pattern>
+                    <pattern id='ssailing' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='sports/sailing.png' x='0' y='0' width='56' height='56' /></pattern>
+                    <pattern id='sshooting' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='sports/shooting.png' x='0' y='0' width='56' height='56' /></pattern>
+                    <pattern id='ssoccer' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='sports/soccer.png' x='0' y='0' width='56' height='56' /></pattern>
+                    <pattern id='ssoftball' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='sports/softball.png' x='0' y='0' width='56' height='56' /></pattern>
+                    <pattern id='sswimming' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='sports/swimming.png' x='0' y='0' width='56' height='56' /></pattern>
+                    <pattern id='ssynchronised_swimming' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='sports/synchronised_swimming.png' x='0' y='0' width='56' height='56' /></pattern>
+                    <pattern id='stable_tennis' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='sports/table_tennis.png' x='0' y='0' width='56' height='56' /></pattern>
+                    <pattern id='staekwondo' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='sports/taekwondo.png' x='0' y='0' width='56' height='56' /></pattern>
+                    <pattern id='stennis' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='sports/tennis.png' x='0' y='0' width='56' height='56' /></pattern>
+                    <pattern id='strack_and_field' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='sports/track_and_field.png' x='0' y='0' width='56' height='56' /></pattern>
+                    <pattern id='striathlon' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='sports/triathlon.png' x='0' y='0' width='56' height='56' /></pattern>
+                    <pattern id='stug_of_war' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='sports/tug_of_war.png' x='0' y='0' width='56' height='56' /></pattern>
+                    <pattern id='svolleyball' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='sports/volleyball.png' x='0' y='0' width='56' height='56' /></pattern>
+                    <pattern id='swater_polo' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='sports/water_polo.png' x='0' y='0' width='56' height='56' /></pattern>
+                    <pattern id='sweightlifting' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='sports/weightlifting.png' x='0' y='0' width='56' height='56' /></pattern>
+                    <pattern id='swrestling' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='sports/wrestling.png' x='0' y='0' width='56' height='56' /></pattern>
+                    <pattern id='scycling' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='sports/cycling.png' x='0' y='0' width='56' height='56' /></pattern>
+
+
+                    <pattern id='s1896' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='years/1896.jpg' x='0' y='0' width='56' height='56' /></pattern>
+                    <pattern id='s1900' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='years/1900.jpg' x='0' y='0' width='56' height='56' /></pattern>
+                    <pattern id='s1904' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='years/1904.jpg' x='0' y='0' width='56' height='56' /></pattern>
+                    <pattern id='s1906' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='years/1906.jpg' x='0' y='0' width='56' height='56' /></pattern>
+                    <pattern id='s1908' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='years/1908.jpg' x='0' y='0' width='56' height='56' /></pattern>
+                    <pattern id='s1912' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='years/1912.jpg' x='0' y='0' width='56' height='56' /></pattern>
+                    <pattern id='s1920' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='years/1920.jpg' x='0' y='0' width='56' height='56' /></pattern>
+                    <pattern id='s1924' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='years/1924.png' x='0' y='0' width='56' height='56' /></pattern>
+                    <pattern id='s1928' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='years/1928.png' x='0' y='0' width='56' height='56' /></pattern>
+                    <pattern id='s1932' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='years/1932.png' x='0' y='0' width='56' height='56' /></pattern>
+                    <pattern id='s1936' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='years/1936.jpg' x='0' y='0' width='56' height='56' /></pattern>
+                    <pattern id='s1948' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='years/1948.png' x='0' y='0' width='56' height='56' /></pattern>
+                    <pattern id='s1952' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='years/1952.png' x='0' y='0' width='56' height='56' /></pattern>
+                    <pattern id='s1956' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='years/1956.png' x='0' y='0' width='56' height='56' /></pattern>
+                    <pattern id='s1960' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='years/1960.png' x='0' y='0' width='56' height='56' /></pattern>
+                    <pattern id='s1964' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='years/1964.png' x='0' y='0' width='56' height='56' /></pattern>
+                    <pattern id='s1968' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='years/1968.png' x='0' y='0' width='56' height='56' /></pattern>
+                    <pattern id='s1972' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='years/1972.png' x='0' y='0' width='56' height='56' /></pattern>
+                    <pattern id='s1976' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='years/1976.png' x='0' y='0' width='56' height='56' /></pattern>
+                    <pattern id='s1980' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='years/1980.png' x='0' y='0' width='56' height='56' /></pattern>
+                    <pattern id='s1984' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='years/1984.png' x='0' y='0' width='56' height='56' /></pattern>
+                    <pattern id='s1988' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='years/1988.png' x='0' y='0' width='56' height='56' /></pattern>
+                    <pattern id='s1992' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='years/1992.png' x='0' y='0' width='56' height='56' /></pattern>
+                    <pattern id='s1996' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='years/1996.png' x='0' y='0' width='56' height='56' /></pattern>
+                    <pattern id='s2000' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='years/2000.png' x='0' y='0' width='56' height='56' /></pattern>
+                    <pattern id='s2004' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='years/2004.png' x='0' y='0' width='56' height='56' /></pattern>
+                    <pattern id='s2008' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='years/2008.png' x='0' y='0' width='56' height='56' /></pattern>
+                </defs>
+            </svg>
         </div>
     </div>
     <div id="aboutcont" class="outer">
@@ -116,111 +190,36 @@
                     </ul>
                 </p>
                 <hr />
-                © 2012 Created by <a href="http://www.visualizing.org/users/artzub">Artem Zubkov</a> (<a href="">GitHub</a>,  <a href="http://artzub.com" title="Artem Zubkov">Artzub</a>). Powered by d3.js.
+                © 2012 Created by <a href="http://www.visualizing.org/users/artzub">Artem Zubkov</a> (<a href="https://github.com/artzub/d3-force-layout-canvas">GitHub</a>,  <a href="http://artzub.com" title="Artem Zubkov">Google+</a>). Powered by d3.js.
             </div>
         </div>
     </div>
     <div id="filterscont" class="outer">
         <div id="filters" class="popup">
-            <span>Filters</span>
+            <span class="trigger">Filters</span>
             <div>
                 <ul class="filtercont">
                     <li>
-                        <h3>Athletes</h3>
+                        <h3 class="trigger">Athletes</h3>
                         <ul id="athletescont"></ul>
                     </li>
                     <li>
-                        <h3>Countries</h3>
+                        <h3 class="trigger">Countries</h3>
                         <ul id="countriescont"></ul>
                     </li>
                     <li>
-                        <h3>Sports</h3>
+                        <h3 class="trigger">Sports</h3>
                         <ul id="sportscont"></ul>
                     </li>
                 </ul>
             </div>
         </div>
     </div>
-    <svg
+    <svg id="mainsvg"
         xmlns:svg="http://www.w3.org/2000/svg"
         xmlns="http://www.w3.org/2000/svg"
         xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
         >
-        <defs id="sportAndYear" xmlns="http://www.w3.org/2000/svg">
-            <pattern id='sarchery' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='sports/archery.svg' x='0' y='0' width='56' height='56' /></pattern>
-            <pattern id='sart_contests' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='sports/art_contests.png' x='0' y='0' width='56' height='56' /></pattern>
-            <pattern id='sathletics' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='sports/athletics.svg' x='0' y='0' width='56' height='56' /></pattern>
-            <pattern id='sbadminton' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='sports/badminton.svg' x='0' y='0' width='56' height='56' /></pattern>
-            <pattern id='sbaseball' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='sports/baseball.svg' x='0' y='0' width='56' height='56' /></pattern>
-            <pattern id='sbasketball' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='sports/basketball.svg' x='0' y='0' width='56' height='56' /></pattern>
-            <pattern id='sboxing' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='sports/boxing.svg' x='0' y='0' width='56' height='56' /></pattern>
-            <pattern id='scanoeing' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='sports/canoeing.svg' x='0' y='0' width='56' height='56' /></pattern>
-            <pattern id='scricket' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='sports/cricket.svg' x='0' y='0' width='56' height='56' /></pattern>
-            <pattern id='scroquet' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='sports/croquet.svg' x='0' y='0' width='56' height='56' /></pattern>
-            <pattern id='scycling' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='sports/cycling.svg' x='0' y='0' width='56' height='56' /></pattern>
-            <pattern id='sdiving' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='sports/diving.svg' x='0' y='0' width='56' height='56' /></pattern>
-            <pattern id='sequestrian' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='sports/equestrian.svg' x='0' y='0' width='56' height='56' /></pattern>
-            <pattern id='sfencing' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='sports/fencing.svg' x='0' y='0' width='56' height='56' /></pattern>
-            <pattern id='sfield_hockey' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='sports/field_hockey.svg' x='0' y='0' width='56' height='56' /></pattern>
-            <pattern id='sfigure_skating' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='sports/figure_skating.svg' x='0' y='0' width='56' height='56' /></pattern>
-            <pattern id='sfootball' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='sports/football.svg' x='0' y='0' width='56' height='56' /></pattern>
-            <pattern id='sgolf' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='sports/golf.svg' x='0' y='0' width='56' height='56' /></pattern>
-            <pattern id='sgymnastics' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='sports/gymnastics.svg' x='0' y='0' width='56' height='56' /></pattern>
-            <pattern id='shandball' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='sports/handball.svg' x='0' y='0' width='56' height='56' /></pattern>
-            <pattern id='sjeu_de_paume' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='sports/jeu_de_paume.svg' x='0' y='0' width='56' height='56' /></pattern>
-            <pattern id='sjudo' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='sports/judo.svg' x='0' y='0' width='56' height='56' /></pattern>
-            <pattern id='smodern_pentathlon' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='sports/modern_pentathlon.svg' x='0' y='0' width='56' height='56' /></pattern>
-            <pattern id='smotor_boating' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='sports/motor_boating.svg' x='0' y='0' width='56' height='56' /></pattern>
-            <pattern id='spelota_basque' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='sports/pelota_basque.svg' x='0' y='0' width='56' height='56' /></pattern>
-            <pattern id='spolo' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='sports/polo.svg' x='0' y='0' width='56' height='56' /></pattern>
-            <pattern id='srackets' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='sports/rackets.svg' x='0' y='0' width='56' height='56' /></pattern>
-            <pattern id='srowing' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='sports/rowing.svg' x='0' y='0' width='56' height='56' /></pattern>
-            <pattern id='ssailing' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='sports/sailing.svg' x='0' y='0' width='56' height='56' /></pattern>
-            <pattern id='sshooting' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='sports/shooting.svg' x='0' y='0' width='56' height='56' /></pattern>
-            <pattern id='ssoccer' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='sports/soccer.svg' x='0' y='0' width='56' height='56' /></pattern>
-            <pattern id='ssoftball' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='sports/softball.svg' x='0' y='0' width='56' height='56' /></pattern>
-            <pattern id='sswimming' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='sports/swimming.svg' x='0' y='0' width='56' height='56' /></pattern>
-            <pattern id='ssynchronised_swimming' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='sports/synchronised_swimming.svg' x='0' y='0' width='56' height='56' /></pattern>
-            <pattern id='stable_tennis' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='sports/table_tennis.svg' x='0' y='0' width='56' height='56' /></pattern>
-            <pattern id='staekwondo' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='sports/taekwondo.svg' x='0' y='0' width='56' height='56' /></pattern>
-            <pattern id='stennis' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='sports/tennis.svg' x='0' y='0' width='56' height='56' /></pattern>
-            <pattern id='strack_and_field' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='sports/track_and_field.svg' x='0' y='0' width='56' height='56' /></pattern>
-            <pattern id='striathlon' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='sports/triathlon.svg' x='0' y='0' width='56' height='56' /></pattern>
-            <pattern id='stug_of_war' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='sports/tug_of_war.svg' x='0' y='0' width='56' height='56' /></pattern>
-            <pattern id='svolleyball' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='sports/volleyball.svg' x='0' y='0' width='56' height='56' /></pattern>
-            <pattern id='swater_polo' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='sports/water_polo.svg' x='0' y='0' width='56' height='56' /></pattern>
-            <pattern id='sweightlifting' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='sports/weightlifting.svg' x='0' y='0' width='56' height='56' /></pattern>
-            <pattern id='swrestling' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='sports/wrestling.svg' x='0' y='0' width='56' height='56' /></pattern>
-
-
-            <pattern id='s1896' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='years/1896.jpg' x='0' y='0' width='56' height='56' /></pattern>
-            <pattern id='s1900' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='years/1900.jpg' x='0' y='0' width='56' height='56' /></pattern>
-            <pattern id='s1904' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='years/1904.jpg' x='0' y='0' width='56' height='56' /></pattern>
-            <pattern id='s1906' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='years/1906.jpg' x='0' y='0' width='56' height='56' /></pattern>
-            <pattern id='s1908' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='years/1908.jpg' x='0' y='0' width='56' height='56' /></pattern>
-            <pattern id='s1912' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='years/1912.jpg' x='0' y='0' width='56' height='56' /></pattern>
-            <pattern id='s1920' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='years/1920.jpg' x='0' y='0' width='56' height='56' /></pattern>
-            <pattern id='s1924' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='years/1924.png' x='0' y='0' width='56' height='56' /></pattern>
-            <pattern id='s1928' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='years/1928.png' x='0' y='0' width='56' height='56' /></pattern>
-            <pattern id='s1932' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='years/1932.png' x='0' y='0' width='56' height='56' /></pattern>
-            <pattern id='s1936' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='years/1936.jpg' x='0' y='0' width='56' height='56' /></pattern>
-            <pattern id='s1948' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='years/1948.png' x='0' y='0' width='56' height='56' /></pattern>
-            <pattern id='s1952' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='years/1952.png' x='0' y='0' width='56' height='56' /></pattern>
-            <pattern id='s1956' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='years/1956.png' x='0' y='0' width='56' height='56' /></pattern>
-            <pattern id='s1960' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='years/1960.png' x='0' y='0' width='56' height='56' /></pattern>
-            <pattern id='s1964' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='years/1964.png' x='0' y='0' width='56' height='56' /></pattern>
-            <pattern id='s1968' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='years/1968.png' x='0' y='0' width='56' height='56' /></pattern>
-            <pattern id='s1972' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='years/1972.png' x='0' y='0' width='56' height='56' /></pattern>
-            <pattern id='s1976' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='years/1976.png' x='0' y='0' width='56' height='56' /></pattern>
-            <pattern id='s1980' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='years/1980.png' x='0' y='0' width='56' height='56' /></pattern>
-            <pattern id='s1984' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='years/1984.png' x='0' y='0' width='56' height='56' /></pattern>
-            <pattern id='s1988' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='years/1988.png' x='0' y='0' width='56' height='56' /></pattern>
-            <pattern id='s1992' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='years/1992.png' x='0' y='0' width='56' height='56' /></pattern>
-            <pattern id='s1996' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='years/1996.png' x='0' y='0' width='56' height='56' /></pattern>
-            <pattern id='s2000' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='years/2000.png' x='0' y='0' width='56' height='56' /></pattern>
-            <pattern id='s2004' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='years/2004.png' x='0' y='0' width='56' height='56' /></pattern>
-            <pattern id='s2008' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='years/2008.png' x='0' y='0' width='56' height='56' /></pattern>
-        </defs>
         <defs id="starsFirst" xmlns="http://www.w3.org/2000/svg">
             <filter id="filter5909" color-interpolation-filters="sRGB">
                 <feColorMatrix id="feColorMatrix5911" values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 1 0 " result="result7"/>

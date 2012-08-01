@@ -352,7 +352,7 @@ var init = function() {
             .scale(lastZoom)
             .scaleExtent([0.1, 8]);
 
-    var svg = d3.select("body").select("svg")
+    var svg = d3.select("body").select("svg#mainsvg")
             .attr("id", "mainsvg")
             .attr("width", width)
             .attr("height", height)
@@ -374,6 +374,13 @@ var init = function() {
 
     var sw = d3.scale.sqrt()
             .range([0.01, 0.2]);
+
+    d3.select("#filters > span:first-child").on("click", function(d) {
+        d3.select(this.parentNode)
+            .classed("clicked", function() {
+                return !d3.select(this).classed("clicked");
+            });
+    })
 
     d3.json("graph.json", function (graph) {
 
@@ -435,6 +442,8 @@ var init = function() {
             .attr("dy", ".35em")
             .attr("text-anchor", "middle")
             .text("Completed");
+
+
 
         graph.edges.forEach(function(d) {
             d.si = d.source;
@@ -598,6 +607,10 @@ var init = function() {
             var html = "<ul>";
             var cases = d.type == undefined ? othertype : d.type.toString();
             switch (cases){
+                case "-1":
+                    html = "<span class='games " + replaceCountry[d.country.abbr].iso + "'></span>" + html;
+                    html += "<li>Medals: <strong>" + d.size + "</strong></li>";
+                    break;
                 case "0":
                     var int = d.label.split(" ")[0];
                     html = "<span class='games g" + int + "'></span>" + html;
@@ -633,7 +646,7 @@ var init = function() {
                      +  "<span style='padding-right: 10px;'><strong>" + d.country.name + "</strong></span></li>";
                     var meds = {};
                     html += "<li>Medals: <strong>" + graph.edges.filter(function(l) {
-                        return l.ti == d.index && (!meds[l.label] ? meds[l.label] = 1 : meds[l.label]++);
+                        return l.si == d.index && (!meds[l.label] ? meds[l.label] = 1 : meds[l.label]++);
                     }).length
                     + "</strong><ul>" +
                         d3.keys(meds).map(function(m) { return "<li>" + m + ": <strong>" + meds[m] + "</strong></li>" }).join("")
@@ -1318,7 +1331,7 @@ var init = function() {
                 h = height() - 290,
                 ma = {top: 40, right: 40, bottom: 40, left: 40};
 
-            var svgstat = divstat.select("div:first-child").append("svg")
+            var svgstat = divstat.select("div:first-child").select("svg")
                     .attr("width", w + ma.left + ma.right)
                     .attr("height", h + ma.top + ma.bottom);
 
@@ -1448,7 +1461,8 @@ var init = function() {
                     lineC,
                     lineM,
                     dotsSelect,
-                    curLinked;
+                    curLinked,
+                    playBut;
 
                 var bp = d3.layout.pack()
                     .size([w / 4 + 50, ha + 30])
@@ -1851,7 +1865,7 @@ var init = function() {
                         function resizeRunner() {
                             runner
                                 .transition()
-                                .duration(150)
+                                .duration(300)
                                 .attr("x", xYearScale(haveDate[curYear[1]]))
                                 .attr("width", xYearScale(haveDate[curYear[2]]) - xYearScale(haveDate[curYear[1]]))
                         }
@@ -2058,6 +2072,52 @@ var init = function() {
                                     .attr("y", 20)
                                     .attr("class", "chartCaption");
                             recalcDate(haveDate[curYear[1]]);
+
+                            var playInterval;
+                            playBut = item.append("g")
+                                    .attr("width", 16)
+                                    .attr("height", 16)
+                                    .attr("transform", "translate(" + [ma.left - 16 , ma.top + ma.top / 2 + hm - 5] + ")")
+                                .on("click", function() {
+                                    if (playInterval) {
+                                        clearInterval(playInterval);
+                                        recalcDate(haveDate[curYear[1]]);
+                                        d3.select(this).select("path")
+                                            .attr("d", "M 0,0 L 0,16 16,8 z")
+                                            .style("fill", "#5EE177");
+                                        playInterval = undefined;
+                                    }
+                                    else {
+                                        d3.select(this).select("path")
+                                            .attr("d", "M 0,0 L 0,16 16,16 16,0 z")
+                                            .style("fill", "#FF746A");
+                                        function step() {
+                                            var i = curYear[2];
+                                            if (curYear[1] == curYear[2] || curYear[2] == haveDate.length - 1)
+                                                i = 0;
+                                            recalcDate(haveDate[i]);
+                                            resizeRunner();
+                                        }
+                                        step();
+                                        playInterval = setInterval(step, 3000);
+                                    }
+                                })
+                                .on("mouseover", function() {
+                                    d3.select(this).select("path")
+                                        .transition()
+                                        .duration(150)
+                                        .style("fill-opacity", 1);
+                                })
+                                .on("mouseout", function() {
+                                    d3.select(this).select("path")
+                                        .transition()
+                                        .duration(150)
+                                        .style("fill-opacity", .5);
+                                })
+                                .append("path")
+                                .attr("d", "M 0,0 L 0,16 16,8 z")
+                                .style("fill", "#5EE177")
+                                .style("fill-opacity", .5);
                             sCTM.initialized = true;
                         });
                     }
@@ -2369,10 +2429,10 @@ var init = function() {
             node.transition()
                 .duration(100)
                 .attr("transform", function(d) {
-                    return "scale(" + (d.type == 3 ? 10 : 5) + ")translate(" + [d.rx / (d.type == 3 ? 10 : 5), d.ry / (d.type == 3 ? 10 : 5)] +")"
+                    return "scale(" + (d.type == 3 ? 20 : 5) + ")translate(" + [d.rx / (d.type == 3 ? 20 : 5), d.ry / (d.type == 3 ? 20 : 5)] +")"
                 });
             node.append("text")
-                    .attr("font-size", "3px")
+                    .attr("font-size", function(d) { return d.type == 3 ? "0.5px" : "3px"; })
                     .attr("pointer-events", "none")
                     .style("cursor", "pointer")
                     .style("fill", function(d) { return d3.rgb(color(calcColor(d))).darker().darker()})
@@ -2416,7 +2476,7 @@ var init = function() {
             });
 
             node = graph.edges.filter(function(l) {
-                return node.indexOf(l.ti) && l.source().type == 0;
+                return node.indexOf(l.ti) > -1 && l.source().type == 0;
             })
             .map(function(l) {
                 return l.si;
@@ -2427,14 +2487,24 @@ var init = function() {
                     d = graph.nodes[d];
                     d.visibile = vis(d.rx, d.ry);
                     if (d.visibile) {
-                        d.size = m.values.length;
+                        var k = {};
+                        k.label = m.key;
+                        k.country = { name : m.key.split("(")[0], abbr : m.key.split("(")[1].replace(/\)/g, ""), };
+                        k.size = m.values.length;
+                        k.rx = d.rx;
+                        k.ry = d.ry;
+                        k.tag = d.tag;
+                        k.visibile = d.visibile;
+                        k.index = 0;
+                        k.type = -1;
+
                         havevis = true;
                         svgnode.append("g")
                             .on("mouseover", showtooltip)
                                 .on("mousemove", movemouese)
                                 .on("mouseout", hideedges)
                                 .attr("class", "overnode")
-                                .datum(d);
+                                .datum(k);
                     }
                 })
 
@@ -2442,7 +2512,7 @@ var init = function() {
 
             if (!conteiner) {
                 conteiner = makeStars(node.filter(function (d) {
-                    return d.type == 0 && this.childNodes.length < 1
+                    return d.type == -1 && this.childNodes.length < 1
                 }), showAsBall ? 5 : 0);
                 if (showAsBall)
                     conteiner = false;

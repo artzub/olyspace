@@ -115,7 +115,7 @@ canvas {
     display: none;
 }
 
-.popup:hover div {
+.popup:hover div, .clicked div {
     display: block;
 }
 
@@ -129,6 +129,17 @@ canvas {
 
 #filters div {
     overflow: hidden;
+}
+
+.trigger:hover:after {
+    color: #5EE277;
+    content: "OPEN";
+}
+
+.clicked span.trigger:hover:after,
+.show h3.trigger:hover:after {
+    color: #FF746A;
+    content: "CLOSE";
 }
 
 .filtercont {
