@@ -6,6 +6,11 @@
  */
 var init = function() {
 
+    window.cMedals = window.cMedals || d3.scale.ordinal()
+        .domain(["GOLD", "SILVER", "BRONZE"])
+        .range(["#FCD975", "#CDC5C2", "#cd7f32"]);
+    window.cCountry = window.cCountry || d3.scale.category20();
+
     d3.asyncForEach = function(items, fnproc) {
         var workArr = items.concat();
 
@@ -1387,10 +1392,6 @@ var init = function() {
                     rScale = d3.scale.sqrt()
                             .range([0, 20]),
                     cScale = d3.scale.category20(),
-                    cCountry = d3.scale.category20(),
-                    cMedals = d3.scale.ordinal()
-                            .domain(["GOLD", "SILVER", "BRONZE"])
-                            .range(["#FCD975", "#CDC5C2", "#cd7f32"]),
                     xYearScale = d3.scale.linear()
                             .domain(d3.extent(haveDate))
                             .range([0, w]),
@@ -2546,15 +2547,12 @@ var init = function() {
         }
 
         function initFilters(id, typeNode, nodeObject, paddingCoff, colors, fnkey, fnhtml) {
-            d3.select(id)
-                    .selectAll("li")
-                    .data(d3.nest()
-                        .key(fnkey || function(d) { return d.label; })
-                        .entries(graph.nodes
-                        .filter(function(d) { return d.type == typeNode; }))
-                        .sort(function(a, b) { return d3.ascending(a.key, b.key); })
-                    )
-                    .enter().append("li")
+
+            function make(items, id, typeNode, nodeObject, paddingCoff, colors, fnkey, fnhtml) {
+                return function(d, arr) {
+                    d3.select(id)
+                    .append("li")
+                    .datum(d)
                     .append("a")
                     .attr("href", function(d) {
                         return "#" + d.key;
@@ -2596,6 +2594,17 @@ var init = function() {
                     .style("padding-left", function(d) {
                         return d.values.length * paddingCoff + "px";
                     });
+                }
+            }
+
+            var items = d3.nest()
+                        .key(fnkey || function(d) { return d.label; })
+                        .entries(graph.nodes
+                        .filter(function(d) { return d.type == typeNode; }))
+                        .sort(function(a, b) { return d3.ascending(b.key, a.key); });
+
+            d3.asyncForEach(items, make(items, id, typeNode, nodeObject, paddingCoff, colors, fnkey, fnhtml));
+
             d3.select(d3.select(id).node().parentNode)
                     .select("h3")
                     .style("cursor", "pointer")

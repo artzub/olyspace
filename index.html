@@ -16,7 +16,7 @@
     <link type="text/css" href="style.css" rel="stylesheet" />
     <!--[if gte IE 9]>
       <style type="text/css">
-        .popup, #statwindow, #tooltip .popup {
+        .popup, #statwindow, #tooltip .popup, .grad {
            filter: none;
         }
         .g-plusone {
@@ -48,10 +48,20 @@
     </script>
     <!-- Place this tag in your head or just before your close body tag. -->
     <script type="text/javascript" src="https://apis.google.com/js/plusone.js"></script>
+    <script type="text/javascript" src="onlinestat.js"></script>
 </head>
 <body onload="init()">
+    <div id="onlines" class="outer">
+        <div class="popup">
+            <span>London 2012</span>
+            <div class="grad">
+                <svg id="online">
+                </svg>
+            </div>
+        </div>
+    </div>
     <div id="statcont" class="outer" style="display: none">
-        <div id="statwindow" class="popup">
+        <div id="statwindow" class="popup grad">
             <svg>
                 <defs id="sportAndYear" xmlns="http://www.w3.org/2000/svg">
                     <pattern id='sarchery' patternUnits='objectBoundingBox' width='56' height='56'><image xlink:href='sports/archery.png' x='0' y='0' width='56' height='56' /></pattern>
